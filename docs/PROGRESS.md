@@ -2,7 +2,7 @@
 
 ## Current stage
 
-**Stage 0 - Agent system initialization**
+**Stage 1 - Application bootstrap**
 
 ## Completed
 
@@ -15,18 +15,35 @@
 - [x] Terraform module strategy defined
 - [x] Atomic approval gate defined
 - [x] Structured Reviewer finding contract defined
+- [x] Agent-system refinement merged into `main`
+- [x] React + Vite frontend approach selected
+- [x] Local frontend, backend, PostgreSQL, and Docker Compose baseline implemented
+- [x] Stage 1 bootstrap review and retrospective completed
+- [x] Stage 1 bootstrap review findings remediated and verified
+- [x] Stage 1 follow-up review completed with no actionable findings
 
 ## In progress
 
-- [ ] Merge agent-system refinement into `main`
+- [ ] Review and merge the local application bootstrap
 
 ## Next
 
-After the agent-system refinement is merged:
+The user should review and merge the local application bootstrap. After that user-controlled merge, open a new approval gate for **Stage 2 - CI**.
 
-**Stage 1 - Application bootstrap decision**
+Stage 2 entry conditions:
 
-The Implementator should present the smallest useful application setup and ask the user to select/approve the frontend approach.
+- the application bootstrap is merged to `main` by the user;
+- a new atomic approval gate is approved;
+- the DevOps Builder is selected for implementation, or the DevOps Tutor if the user chooses a one-task-at-a-time learning flow.
+
+Initial Stage 2 scope:
+
+- separate `frontend-ci` and `backend-ci` GitHub Actions workflows;
+- `lint -> test -> build` for each component;
+- relevant path filters;
+- runs on pull requests and again after relevant changes are merged to `main`.
+
+Deployment, Terraform, Azure resources, image publishing, and CD remain explicitly out of scope for Stage 2 CI.
 
 Expected baseline:
 - backend: Node.js + TypeScript + Prisma
