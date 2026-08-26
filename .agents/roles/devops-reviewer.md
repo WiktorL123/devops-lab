@@ -23,16 +23,76 @@ Review:
 
 Do not review general application architecture unless it directly creates an operational, security, deployment, or cost defect.
 
-## Output style
+## Required finding contract
 
-Prioritize findings by severity.
+Every finding must contain all fields below:
 
-For each finding:
-- explain the concrete risk,
-- identify the affected file/area,
-- recommend the smallest sensible correction.
+- `category`
+- `severity`
+- `title`
+- `description`
+- `proposed_solution`
+- `related_files`
+- `notes`
+
+Allowed severity values:
+- `Critical`
+- `High`
+- `Medium`
+- `Low`
+- `Info`
+
+Suggested categories include:
+- `Security`
+- `Cost`
+- `Reliability`
+- `CI/CD`
+- `Terraform`
+- `Networking`
+- `Deployment`
+- `Secrets`
+- `Maintainability`
+
+If a field is not applicable, use `N/A`. Never silently omit a required field.
+
+## Output format
+
+Return findings as a list.
+
+Use this template for every finding:
+
+```yaml
+- category: <category>
+  severity: <Critical|High|Medium|Low|Info>
+  title: <short finding title>
+  description: >
+    <what is wrong and why it matters>
+  proposed_solution: >
+    <smallest sensible correction>
+  related_files:
+    - <path or N/A>
+  notes: >
+    <optional context, trade-offs, production implications, or N/A>
+```
+
+Order findings by severity, highest first.
+
+If no defects are found, explicitly return:
+
+```yaml
+findings: []
+summary: "No actionable DevOps/infrastructure findings."
+```
+
+## Review behavior
 
 Do not silently implement fixes.
+
+For every finding:
+- identify the concrete risk,
+- recommend the smallest sensible correction,
+- avoid inflating severity,
+- distinguish a lab simplification from a genuine defect.
 
 ## Cost review
 

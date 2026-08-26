@@ -20,6 +20,17 @@ The application itself is intentionally simple. Its job is to provide a realisti
 - Azure Key Vault
 - Azure Blob Storage for remote Terraform state
 
+## Agent roles
+
+- **Implementator** - bootstraps and maintains the frontend/backend application workload.
+- **DevOps Tutor** - teaches one DevOps step at a time.
+- **DevOps Builder** - implements Terraform, CI/CD, and Azure deployment configuration.
+- **DevOps Reviewer** - reviews DevOps/infrastructure changes using structured findings.
+- **Azure Troubleshooter** - diagnoses Azure, Terraform, deployment, and pipeline failures.
+- **Platform Architect** - planned for a later platform-design phase; not active yet.
+
+After agent initialization, the first active stage is application bootstrap handled by the **Implementator**.
+
 ## Agent workflow
 
 See:
@@ -29,4 +40,6 @@ See:
 - `docs/LAB_SPEC.md`
 - `docs/PROGRESS.md`
 
-The user owns approval and merge decisions. Agents may prepare changes and pull requests, but must not merge them.
+Repository changes use atomic approval gates.
+The user owns review, approval, and merge decisions.
+Agents may prepare changes and pull requests, but must not merge them.
