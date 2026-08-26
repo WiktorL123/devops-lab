@@ -22,21 +22,29 @@ Application architecture is deliberately secondary.
 ## Non-negotiable working agreement
 
 1. Never merge pull requests. The user reviews, approves, and merges.
-2. Before modifying repository content, present a short implementation plan and wait for explicit user approval, unless the user has already approved that exact change scope.
-3. Prefer the cheapest sensible Azure option for this lab.
-4. Before selecting or changing a paid Azure SKU:
+2. Repository changes use an atomic approval gate. Approval applies only to the explicitly described atomic change-set.
+3. Before requesting approval, state:
+   - objective,
+   - files/resources expected to change,
+   - behavior being introduced or changed,
+   - what is explicitly out of scope.
+4. Approval for one change-set must never be interpreted as approval for adjacent or subsequent work.
+5. If implementation reveals that additional scope is required, stop and request a new approval.
+6. Prefer the cheapest sensible Azure option for this lab.
+7. Before selecting or changing a paid Azure SKU:
    - propose the cheapest sensible option,
    - explain why it is sufficient,
    - state the main compromise versus a more production-oriented option,
    - ask for approval.
-5. Runtime secrets belong in Azure Key Vault.
-6. Build-time secrets belong in the CI/CD platform.
-7. Frontend and backend remain separate deployable containers.
-8. Frontend and backend Dockerfiles must be multi-stage.
-9. Do not introduce DDD, Clean Architecture, Hexagonal Architecture, CQRS, or similar application architecture unless explicitly requested.
-10. Infrastructure code is versioned in Git. Terraform state, secrets, and generated Terraform directories are not.
-11. Update relevant documentation when a commit materially changes infrastructure, pipelines, deployment flow, secrets, environment structure, cloud mapping, or lab progress.
-12. The first real application deployment must happen through CI/CD, not through a manual deployment command.
+8. Runtime secrets belong in Azure Key Vault.
+9. Build-time secrets belong in the CI/CD platform.
+10. Frontend and backend remain separate deployable containers.
+11. Frontend and backend Dockerfiles must be multi-stage.
+12. If the Nunjucks frontend option is selected, use GOV.UK Frontend components/macros as the component foundation, but apply a custom visual layer. Do not ship an unmodified GOV.UK-looking service and do not fork/rewrite the entire GOV.UK Frontend library.
+13. Do not introduce DDD, Clean Architecture, Hexagonal Architecture, CQRS, or similar application architecture unless explicitly requested.
+14. Infrastructure code is versioned in Git. Terraform state, secrets, and generated Terraform directories are not.
+15. Update relevant documentation when a commit materially changes infrastructure, pipelines, deployment flow, secrets, environment structure, cloud mapping, or lab progress.
+16. The first real application deployment must happen through CI/CD, not through a manual deployment command.
 
 ## Budget
 
@@ -195,11 +203,13 @@ Documentation-only and test-only changes do not require a version bump.
 
 Detailed instructions live under `.agents/roles/`.
 
-- **Implementation**: builds and changes the application workload.
+- **Implementator**: builds and changes the application workload, including initial bootstrap.
 - **DevOps Tutor**: teaches one approved step at a time.
 - **DevOps Builder**: implements Terraform, pipelines, and deployment configuration.
-- **DevOps Reviewer**: reviews only DevOps/infrastructure concerns.
+- **DevOps Reviewer**: reviews DevOps/infrastructure concerns using a structured finding template.
 - **Azure Troubleshooter**: diagnoses Azure, Terraform, deployment, and pipeline failures.
+
+A future **Platform Architect** role is planned for the platform-design phase. It is intentionally not active yet. When introduced, it must compare multiple complete platform alternatives before recommending one.
 
 See `docs/AGENT_INDEX.md` for routing.
 

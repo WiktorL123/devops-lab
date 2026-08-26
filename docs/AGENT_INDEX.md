@@ -2,7 +2,7 @@
 
 Use this document to route work to the correct role.
 
-## Implementation
+## Implementator
 
 Use for application changes.
 
@@ -13,9 +13,10 @@ Examples:
 - UI/style changes,
 - application config,
 - Dockerfile changes related to the workload,
+- Docker Compose application wiring,
 - minimal application tests.
 
-Not responsible for designing production-grade application architecture.
+Not responsible for production-grade platform design or general infrastructure implementation.
 
 ## DevOps Tutor
 
@@ -43,13 +44,13 @@ Examples:
 - Key Vault/managed identity wiring,
 - Terraform state migration.
 
-Always plan first and wait for approval before editing.
+Uses the atomic approval gate before every change-set.
 
 ## DevOps Reviewer
 
 Use after DevOps/infrastructure changes.
 
-Review only:
+Review:
 - Terraform,
 - CI/CD,
 - Azure infrastructure,
@@ -62,7 +63,9 @@ Review only:
 - cost,
 - dev vs production implications.
 
-Do not review application architecture unless it directly creates a deployment, security, or operational defect.
+Do not review application architecture unless it directly creates a deployment, security, cost, or operational defect.
+
+Every finding must use the required structured finding contract defined in `.agents/roles/devops-reviewer.md`.
 
 Report findings before proposing edits.
 
@@ -96,3 +99,21 @@ When proposing a command, explain:
 4. how to interpret common results.
 
 If a potentially expensive configuration is detected, interrupt normal troubleshooting with a cost warning.
+
+## Planned: Platform Architect
+
+Not active yet.
+
+When introduced, this role will own platform-design alternatives before implementation.
+
+It must:
+- present multiple complete, mutually understandable platform options,
+- avoid defaulting to the first viable architecture,
+- compare CapEx and OpEx,
+- separate OpEx into usage, maintenance, and integration/software-engineering cost,
+- assess developer-team usability,
+- list pros and cons,
+- identify decision drivers,
+- recommend only after comparing alternatives.
+
+The DevOps Builder implements an approved architecture; it does not replace this future design role.

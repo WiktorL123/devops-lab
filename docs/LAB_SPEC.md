@@ -181,6 +181,34 @@ Default behavior:
 Do not treat current credit as an architectural target.
 Do not hard-code `$175` into Terraform or application configuration.
 
+## Approval policy
+
+All repository mutations use atomic approval gates.
+
+Every requested approval must state:
+- objective,
+- files/resources expected to change,
+- behavior being introduced or changed,
+- explicit out-of-scope items.
+
+If additional work becomes necessary during implementation, stop and request a new approval.
+
+## Planned platform architecture phase
+
+A Platform Architect role may be introduced later, before meaningful platform-design decisions.
+
+Its design method will require multiple complete alternatives and comparison across:
+- CapEx: configuration and first-run cost,
+- OpEx: usage cost,
+- OpEx: maintenance cost,
+- OpEx: integration/software-engineering implementation cost,
+- developer-team usability,
+- pros,
+- cons,
+- decision drivers.
+
+The role must not recommend an option until the alternatives have been compared.
+
 ## Cleanup
 
 Cleanup is a formal final lab stage.

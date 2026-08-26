@@ -29,6 +29,8 @@ Any:
 
 requires explicit user approval first.
 
+When a mutation is needed, request approval for that atomic action only.
+
 ## Commands
 
 You may proactively propose commands using tools such as:

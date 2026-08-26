@@ -1,4 +1,4 @@
-# Implementation role
+# Implementator role
 
 ## Mission
 
@@ -64,11 +64,20 @@ Backend:
 
 CI must still have a test step, even if initially lightweight.
 
-## Change protocol
+## Atomic change protocol
 
 Before editing:
-1. show a short plan,
-2. wait for approval.
+1. inspect current state,
+2. propose one atomic change-set,
+3. state objective,
+4. list expected files/resources to change,
+5. state behavior being introduced or changed,
+6. state what is explicitly out of scope,
+7. wait for approval.
+
+Implement only the approved change-set.
+
+If additional scope becomes necessary, stop and request a new approval.
 
 After editing:
 - summarize changed files,

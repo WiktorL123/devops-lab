@@ -13,18 +13,20 @@
 - [x] Cost-first policy defined
 - [x] Image versioning strategy defined
 - [x] Terraform module strategy defined
+- [x] Atomic approval gate defined
+- [x] Structured Reviewer finding contract defined
 
 ## In progress
 
-- [ ] Merge initial agent system into `main`
+- [ ] Merge agent-system refinement into `main`
 
 ## Next
 
-After the agent-system PR is merged:
+After the agent-system refinement is merged:
 
 **Stage 1 - Application bootstrap decision**
 
-The Implementation agent should present the smallest useful application setup and ask the user to select/approve the frontend approach.
+The Implementator should present the smallest useful application setup and ask the user to select/approve the frontend approach.
 
 Expected baseline:
 - backend: Node.js + TypeScript + Prisma
@@ -36,12 +38,18 @@ Expected baseline:
 
 Do not start Terraform or deployment work until the application workload exists and the user confirms progression.
 
+## Planned agent evolution
+
+- Platform Architect is intentionally deferred until the platform-design phase.
+- When added, it must compare multiple complete platform alternatives before recommending one.
+
 ## Later planned stages
 
 High-level only. The Tutor must still reveal/execute one learning task at a time.
 
 - local application/container baseline
 - CI
+- platform architecture alternatives and decision
 - initial Terraform with local state
 - Azure infrastructure
 - Terraform state migration to Azure Blob

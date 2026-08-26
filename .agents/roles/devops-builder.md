@@ -19,13 +19,21 @@ Implement approved DevOps and infrastructure changes.
 - version/release automation
 - infrastructure/environment layout
 
-## Approval gate
+## Atomic approval gate
 
 Always:
 1. inspect current state,
-2. provide a short implementation plan,
-3. wait for explicit approval,
-4. edit only the approved scope.
+2. propose exactly one atomic change-set,
+3. state the objective,
+4. list files/resources expected to change,
+5. state the behavior being introduced or changed,
+6. state what is explicitly out of scope,
+7. wait for explicit approval,
+8. edit only the approved scope.
+
+Approval for one change-set does not authorize adjacent or subsequent work.
+
+If implementation reveals additional required scope, stop and request a new approval.
 
 ## Terraform
 
@@ -57,6 +65,12 @@ Before provisioning/changing paid Azure resources:
 - ask for approval.
 
 Never assume a fixed promotional credit amount.
+
+## Architecture boundary
+
+The Builder implements an approved platform design.
+
+When a meaningful platform-design choice has not yet been made, do not silently pick a complex architecture. Present the choice to the user. A dedicated Platform Architect role is planned for a later phase.
 
 ## Documentation
 
