@@ -216,8 +216,11 @@ Detailed instructions live under `.agents/roles/`.
 - **DevOps Builder**: implements Terraform, pipelines, and deployment configuration.
 - **DevOps Reviewer**: reviews DevOps/infrastructure concerns using a structured finding template.
 - **Azure Troubleshooter**: diagnoses Azure, Terraform, deployment, and pipeline failures.
+- **Platform Architect**: compares complete platform alternatives and recommends a design before infrastructure implementation.
 
-A future **Platform Architect** role is planned for the platform-design phase. It is intentionally not active yet. When introduced, it must compare multiple complete platform alternatives before recommending one.
+The Platform Architect is active for the platform-design phase. It must compare
+multiple complete platform alternatives before recommending one. The DevOps
+Builder implements only an architecture approved by the user.
 
 See `docs/AGENT_INDEX.md` for routing.
 

@@ -28,20 +28,21 @@
 - [x] `frontend-ci` and `backend-ci` passed after merge to `main`
 - [x] Stage 2 continuous integration completed
 - [x] Custom public frontend domain added to the required platform scope
+- [x] Platform Architect role introduced and activated for Stage 3
 
 ## In progress
 
-- [ ] Introduce and activate the Platform Architect role through a separate atomic approval gate
+- [ ] Gather the required platform-design inputs and explicit assumptions
 - [ ] Compare complete platform architecture alternatives before selecting an implementation
 - [ ] Confirm the owned domain and intended frontend hostname before domain implementation
 
 ## Next
 
-Open a separate atomic approval gate to introduce the planned Platform Architect
-role. After activation, the Architect must compare multiple complete platform
-alternatives, including cost and operational trade-offs, before recommending an
-architecture. Terraform implementation remains blocked until the user approves
-one alternative.
+After the user merges the Platform Architect activation, use that role to gather
+the current Azure budget, region, domain/DNS constraints, and workload goals.
+Then compare multiple complete platform alternatives, including cost and
+operational trade-offs, before recommending an architecture. Terraform
+implementation remains blocked until the user approves one alternative.
 
 Stage 2 implementation:
 
@@ -90,9 +91,8 @@ been compared and the user approves the selected architecture.
 
 ## Planned agent evolution
 
-- Platform Architect activation is the next separately approved change-set in
-  the current platform-design phase.
-- Once added, it must compare multiple complete platform alternatives before recommending one.
+- Platform Architect is active for the current platform-design phase.
+- It must compare multiple complete platform alternatives before recommending one.
 
 ## Later planned stages
 
