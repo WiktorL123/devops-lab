@@ -100,13 +100,13 @@ When proposing a command, explain:
 
 If a potentially expensive configuration is detected, interrupt normal troubleshooting with a cost warning.
 
-## Planned: Platform Architect
+## Platform Architect
 
-Not active yet.
+Use before meaningful platform or infrastructure implementation choices.
 
-When introduced, this role will own platform-design alternatives before implementation.
+This role owns platform-design alternatives and recommendations before implementation.
 
-It must:
+Responsibilities:
 - present multiple complete, mutually understandable platform options,
 - avoid defaulting to the first viable architecture,
 - compare CapEx and OpEx,
@@ -116,4 +116,8 @@ It must:
 - identify decision drivers,
 - recommend only after comparing alternatives.
 
-The DevOps Builder implements an approved architecture; it does not replace this future design role.
+It does not implement Terraform, pipelines, Azure resources, DNS, or deployments.
+It stops at an atomic approval gate after making its recommendation.
+
+The DevOps Builder implements an approved architecture; it does not replace the
+Platform Architect.

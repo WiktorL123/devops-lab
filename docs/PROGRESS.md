@@ -2,7 +2,7 @@
 
 ## Current stage
 
-**Stage 3 - Platform architecture alternatives and decision**
+**Stage 4 - Initial Terraform with local state**
 
 ## Completed
 
@@ -28,20 +28,26 @@
 - [x] `frontend-ci` and `backend-ci` passed after merge to `main`
 - [x] Stage 2 continuous integration completed
 - [x] Custom public frontend domain added to the required platform scope
+- [x] Platform Architect role introduced and activated for Stage 3
+- [x] Stage 3 platform-design inputs gathered and verified
+- [x] Three complete platform alternatives documented with cost and RBAC analysis
+- [x] Option B balanced private-data-plane architecture selected
+- [x] Architecture decision and Builder handoff recorded in ADR-001
+- [x] Stage 3 platform architecture completed
 
 ## In progress
 
-- [ ] Introduce and activate the Platform Architect role through a separate atomic approval gate
-- [ ] Compare complete platform architecture alternatives before selecting an implementation
-- [ ] Confirm the owned domain and intended frontend hostname before domain implementation
+- [ ] Define the first atomic Stage 4 Terraform change-set
+- [ ] Confirm the initial module and `dev` environment boundaries before files
+  are created
 
 ## Next
 
-Open a separate atomic approval gate to introduce the planned Platform Architect
-role. After activation, the Architect must compare multiple complete platform
-alternatives, including cost and operational trade-offs, before recommending an
-architecture. Terraform implementation remains blocked until the user approves
-one alternative.
+Use the DevOps Builder for Stage 4. First propose the initial Terraform
+repository structure and local-state bootstrap as one atomic change-set. Explain
+the module/environment boundary and validation behavior, then wait for approval
+before creating `infra/**`. Do not provision Azure resources in the structural
+bootstrap change-set.
 
 Stage 2 implementation:
 
@@ -85,14 +91,15 @@ Expected baseline:
 - local Docker Compose
 - if Nunjucks is selected: GOV.UK Frontend components/macros with a custom `devops-lab` visual layer
 
-Do not start Terraform or deployment work until the platform alternatives have
-been compared and the user approves the selected architecture.
+The selected architecture is Option B. Terraform implementation may begin only
+through a new Stage 4 atomic approval gate. Azure provisioning, remote-state
+migration, deployment, and DNS changes remain separately gated.
 
 ## Planned agent evolution
 
-- Platform Architect activation is the next separately approved change-set in
-  the current platform-design phase.
-- Once added, it must compare multiple complete platform alternatives before recommending one.
+- Platform Architect completed the Stage 3 decision.
+- DevOps Builder is the next role and must propose the first Stage 4 atomic
+  change-set before implementation.
 
 ## Later planned stages
 
@@ -100,8 +107,8 @@ High-level only. The Tutor must still reveal/execute one learning task at a time
 
 - local application/container baseline
 - CI
-- platform architecture alternatives and decision (current)
-- initial Terraform with local state
+- platform architecture alternatives and decision (completed)
+- initial Terraform with local state (current)
 - Azure infrastructure
 - Terraform state migration to Azure Blob
 - ACR/container delivery

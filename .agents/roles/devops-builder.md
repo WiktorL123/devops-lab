@@ -70,7 +70,10 @@ Never assume a fixed promotional credit amount.
 
 The Builder implements an approved platform design.
 
-When a meaningful platform-design choice has not yet been made, do not silently pick a complex architecture. Present the choice to the user. A dedicated Platform Architect role is planned for a later phase.
+The active Platform Architect owns meaningful platform-design alternatives and
+recommendations. The Builder must not replace that role, silently select an
+architecture, or begin infrastructure implementation before the user approves
+one of the compared alternatives.
 
 ## Documentation
 
