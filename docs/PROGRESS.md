@@ -2,7 +2,7 @@
 
 ## Current stage
 
-**Stage 1 - Application bootstrap**
+**Stage 2 - Continuous integration**
 
 ## Completed
 
@@ -21,20 +21,29 @@
 - [x] Stage 1 bootstrap review and retrospective completed
 - [x] Stage 1 bootstrap review findings remediated and verified
 - [x] Stage 1 follow-up review completed with no actionable findings
+- [x] Application bootstrap merged into `main`
+- [x] Separate frontend and backend CI workflow definitions implemented
+- [x] Stage 2 local CI review and retrospective completed with no actionable findings
+- [x] GitHub Actions confirmed as the sole provider for the active CI/CD delivery path
 
 ## In progress
 
-- [ ] Review and merge the local application bootstrap
+- [ ] Verify `frontend-ci` and `backend-ci` in the Stage 2 pull request
+- [ ] Review and merge the Stage 2 CI pull request
 
 ## Next
 
-The user should review and merge the local application bootstrap. After that user-controlled merge, open a new approval gate for **Stage 2 - CI**.
+Push the `devops/ci` branch and open a pull request to verify both path-scoped CI workflows on GitHub Actions. After successful CI review and user-controlled merge, confirm Stage 2 completion before opening a new approval gate for later work.
 
-Stage 2 entry conditions:
+The local Stage 2 review found no actionable DevOps findings. Hosted execution
+is still unverified, so Stage 2 remains in progress until both workflows pass in
+the pull request. See `docs/reviews/STAGE_2_CI_REVIEW.md`.
 
-- the application bootstrap is merged to `main` by the user;
-- a new atomic approval gate is approved;
-- the DevOps Builder is selected for implementation, or the DevOps Tutor if the user chooses a one-task-at-a-time learning flow.
+Stage 2 implementation:
+
+- the application bootstrap was merged to `main` by the user;
+- atomic change-set #5 was approved;
+- the DevOps Builder implemented the workflow definitions.
 
 Initial Stage 2 scope:
 
@@ -44,6 +53,12 @@ Initial Stage 2 scope:
 - runs on pull requests and again after relevant changes are merged to `main`.
 
 Deployment, Terraform, Azure resources, image publishing, and CD remain explicitly out of scope for Stage 2 CI.
+
+Future CI and CD implementation will remain entirely in GitHub Actions. The
+planned CD handoff publishes images to ACR only after successful post-merge CI
+for runtime-impacting component changes. Images use `<semver>-<short-sha>` tags,
+while deployments select the exact immutable digest. Azure Pipelines is not part
+of the active delivery path.
 
 Expected baseline:
 - backend: Node.js + TypeScript + Prisma
