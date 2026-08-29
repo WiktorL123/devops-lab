@@ -2,7 +2,7 @@
 
 ## Current stage
 
-**Stage 2 - Continuous integration**
+**Stage 3 - Platform architecture alternatives and decision**
 
 ## Completed
 
@@ -25,19 +25,23 @@
 - [x] Separate frontend and backend CI workflow definitions implemented
 - [x] Stage 2 local CI review and retrospective completed with no actionable findings
 - [x] GitHub Actions confirmed as the sole provider for the active CI/CD delivery path
+- [x] `frontend-ci` and `backend-ci` passed after merge to `main`
+- [x] Stage 2 continuous integration completed
+- [x] Custom public frontend domain added to the required platform scope
 
 ## In progress
 
-- [ ] Verify `frontend-ci` and `backend-ci` in the Stage 2 pull request
-- [ ] Review and merge the Stage 2 CI pull request
+- [ ] Introduce and activate the Platform Architect role through a separate atomic approval gate
+- [ ] Compare complete platform architecture alternatives before selecting an implementation
+- [ ] Confirm the owned domain and intended frontend hostname before domain implementation
 
 ## Next
 
-Push the `devops/ci` branch and open a pull request to verify both path-scoped CI workflows on GitHub Actions. After successful CI review and user-controlled merge, confirm Stage 2 completion before opening a new approval gate for later work.
-
-The local Stage 2 review found no actionable DevOps findings. Hosted execution
-is still unverified, so Stage 2 remains in progress until both workflows pass in
-the pull request. See `docs/reviews/STAGE_2_CI_REVIEW.md`.
+Open a separate atomic approval gate to introduce the planned Platform Architect
+role. After activation, the Architect must compare multiple complete platform
+alternatives, including cost and operational trade-offs, before recommending an
+architecture. Terraform implementation remains blocked until the user approves
+one alternative.
 
 Stage 2 implementation:
 
@@ -60,6 +64,19 @@ for runtime-impacting component changes. Images use `<semver>-<short-sha>` tags,
 while deployments select the exact immutable digest. Azure Pipelines is not part
 of the active delivery path.
 
+Stage 3 platform requirements now include:
+
+- a custom public domain for the frontend instead of treating the generated
+  Azure Container Apps FQDN as the application URL;
+- a free managed TLS certificate as the cost-first baseline;
+- DNS ownership validation and a direct CNAME for a subdomain, or an A record
+  for an apex domain;
+- internal backend communication without a separate public custom domain;
+- an externally owned domain and controllable DNS records as prerequisites;
+- Azure DNS only if a later comparison justifies its additional cost and learning value;
+- future infrastructure/CD support for hostname binding, certificate readiness,
+  and HTTPS verification against the custom domain.
+
 Expected baseline:
 - backend: Node.js + TypeScript + Prisma
 - PostgreSQL
@@ -68,12 +85,14 @@ Expected baseline:
 - local Docker Compose
 - if Nunjucks is selected: GOV.UK Frontend components/macros with a custom `devops-lab` visual layer
 
-Do not start Terraform or deployment work until the application workload exists and the user confirms progression.
+Do not start Terraform or deployment work until the platform alternatives have
+been compared and the user approves the selected architecture.
 
 ## Planned agent evolution
 
-- Platform Architect is intentionally deferred until the platform-design phase.
-- When added, it must compare multiple complete platform alternatives before recommending one.
+- Platform Architect activation is the next separately approved change-set in
+  the current platform-design phase.
+- Once added, it must compare multiple complete platform alternatives before recommending one.
 
 ## Later planned stages
 
@@ -81,7 +100,7 @@ High-level only. The Tutor must still reveal/execute one learning task at a time
 
 - local application/container baseline
 - CI
-- platform architecture alternatives and decision
+- platform architecture alternatives and decision (current)
 - initial Terraform with local state
 - Azure infrastructure
 - Terraform state migration to Azure Blob
@@ -91,6 +110,7 @@ High-level only. The Tutor must still reveal/execute one learning task at a time
 - database migration flow
 - image/version gates
 - rollback exercise
+- custom frontend domain and managed TLS integration
 - optional prod comparison
-- optional custom DNS/domain
+- optional Azure DNS comparison/migration
 - cleanup

@@ -85,9 +85,17 @@ Current Azure mapping:
 - Azure Container Registry
 - Azure Key Vault
 - Azure Blob Storage for Terraform remote state
-- default Azure Container Apps ingress/DNS
+- Azure Container Apps ingress with a custom public frontend domain
+- a free Azure Container Apps managed TLS certificate for the frontend domain
 
-Custom domain and Azure DNS are optional.
+The platform-generated Azure Container Apps FQDN remains a technical endpoint,
+but it is not the intended public application address. The backend does not need
+a public custom domain and should use internal Container Apps communication.
+
+The domain registration and control of its DNS records are external
+prerequisites. Azure DNS remains optional; prefer the existing DNS provider when
+it is sufficient and cheaper for the lab.
+
 Monitoring/observability is not part of the initial core scope.
 AKS is optional and should not be introduced unless explicitly requested.
 

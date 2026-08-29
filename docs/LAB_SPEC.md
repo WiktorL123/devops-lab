@@ -49,15 +49,32 @@ Core:
 - Azure Container Registry
 - Azure Key Vault
 - Azure Blob Storage for Terraform remote state after migration
-- Azure-managed/default Container Apps ingress and DNS
+- public frontend ingress with a custom domain
+- free Azure Container Apps managed TLS certificate for the frontend domain
+- internal backend ingress without a public custom domain
 
 Optional:
-- custom domain
 - Azure DNS
-- TLS/domain exercises beyond default ingress
+- advanced TLS exercises using an uploaded or Key Vault-backed certificate
 - production environment
 - AKS
 - monitoring/observability
+
+The custom frontend domain is required for the accepted platform outcome. Azure
+still assigns a generated `*.azurecontainerapps.io` FQDN, but that address is a
+technical platform endpoint rather than the documented public application URL.
+
+The intended low-cost baseline is a subdomain such as `app.<owned-domain>`, a
+direct DNS CNAME to the generated frontend Container App hostname, the required
+TXT ownership-validation record, and a free managed certificate. An apex domain
+may instead use an A record to the Container Apps environment IP. The exact
+hostname must be supplied before implementation.
+
+Domain registration and DNS control are external prerequisites. Existing
+external DNS hosting may be used; selecting Azure DNS requires a separate
+cost-aware decision. Future infrastructure and delivery work must account for
+the Azure-side hostname binding, DNS validation dependency, certificate
+issuance/renewal conditions, and an HTTPS smoke test against the custom domain.
 
 ## Secrets
 
