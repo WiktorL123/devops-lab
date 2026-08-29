@@ -53,6 +53,17 @@ npm run build
 
 Run them inside `frontend/` or `backend/` after installing that component's dependencies.
 
+## Continuous integration
+
+GitHub Actions runs independent `frontend-ci` and `backend-ci` workflows. Each workflow:
+
+- runs for pull requests that change its component, the shared Node.js version, or the workflow itself;
+- runs again after relevant changes are merged to `main`;
+- uses the Node.js version from `.nvmrc` and caches the component's npm download cache;
+- executes `lint -> test -> build` after a deterministic `npm ci` install.
+
+Backend CI also generates Prisma Client before the quality checks. Stage 2 CI does not build or publish container images and does not deploy the application.
+
 Azure-first DevOps learning lab focused on CI/CD, Terraform, container delivery, secrets, managed PostgreSQL, troubleshooting, and cost-aware infrastructure.
 
 The application itself is intentionally simple. Its job is to provide a realistic frontend/backend workload for DevOps exercises.

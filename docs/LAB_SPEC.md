@@ -87,18 +87,33 @@ The second run after merge is intentional redundancy and acts as a deployment qu
 
 ## CD
 
+The selected CI/CD provider for the active lab implementation is GitHub Actions.
+Azure Pipelines is not part of the current delivery path.
+
+Deployment workflows run only after the corresponding post-merge CI workflow
+has succeeded on `main` and the component has runtime-impacting changes. Pull
+request workflows do not publish or deploy container images.
+
 Frontend:
 - successful post-merge frontend CI
 - build container
 - push to ACR
+- tag the image as `<semver>-<short-sha>`
+- capture the immutable image digest
 - deploy/update frontend Container App
 
 Backend:
 - successful post-merge backend CI
 - build container
 - push to ACR
+- tag the image as `<semver>-<short-sha>`
+- capture the immutable image digest
 - explicit Prisma migration job/stage
 - deploy/update backend Container App
+
+Deployments identify the selected image by its immutable registry digest. The
+semantic-version and short-SHA tag remains a human-readable release identifier.
+Do not publish or deploy `latest`.
 
 The first real deployment happens through CI/CD.
 
