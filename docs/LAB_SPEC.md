@@ -52,13 +52,17 @@ Core:
 - public frontend ingress with a custom domain
 - free Azure Container Apps managed TLS certificate for the frontend domain
 - internal backend ingress without a public custom domain
+- customer VNet integration with dedicated Container Apps and delegated
+  PostgreSQL subnets
+- private PostgreSQL networking and private DNS
+- Azure Log Analytics workspace for initial platform troubleshooting
 
 Optional:
 - Azure DNS
 - advanced TLS exercises using an uploaded or Key Vault-backed certificate
 - production environment
 - AKS
-- monitoring/observability
+- monitoring/observability beyond the baseline Log Analytics workspace
 
 The custom frontend domain is required for the accepted platform outcome. Azure
 still assigns a generated `*.azurecontainerapps.io` FQDN, but that address is a
@@ -75,6 +79,22 @@ external DNS hosting may be used; selecting Azure DNS requires a separate
 cost-aware decision. Future infrastructure and delivery work must account for
 the Azure-side hostname binding, DNS validation dependency, certificate
 issuance/renewal conditions, and an HTTPS smoke test against the custom domain.
+
+The selected Azure architecture is Option B, the balanced private-data-plane
+design recorded in `docs/architecture/ADR-001-platform-architecture.md`. The
+frontend is the only public application ingress. Its Nginx proxies relative
+`/api/*` requests to the internally exposed backend Container App. Consequently,
+API routes remain reachable through the frontend origin and require application
+authentication/authorization where appropriate; the backend has no separate
+public ingress. Container Apps supplies the platform edge proxy, so the initial
+design does not add Front Door or Application Gateway.
+
+The dev platform uses `polandcentral`, a lifecycle-based resource-group split,
+Consumption Container Apps, private PostgreSQL Flexible Server `B1ms` with
+32 GiB storage and no HA, ACR Basic, Key Vault Standard, and Log Analytics
+pay-as-you-go with 30-day retention and a daily cap. These are approved planning
+assumptions, not authorization to provision paid resources. Availability and
+current prices must be rechecked before provisioning.
 
 ## Secrets
 
@@ -139,6 +159,15 @@ The first real deployment happens through CI/CD.
 Start with local state.
 
 Later migrate state deliberately to Azure Blob Storage as a learning exercise.
+
+The remote-state target is a dedicated StorageV2 `Standard_LRS` account in
+`rg-devopslab-tfstate-polandcentral`, separate from the resources controlled by
+that state. It uses a private `tfstate` container and a key such as
+`dev/terraform.tfstate`, with blob versioning and 14-day blob/container soft
+delete. Shared Key authorization is disabled. GitHub-hosted runners authenticate
+through OIDC and Entra ID and receive `Storage Blob Data Contributor` at the
+smallest practical state-container scope. The public blob service endpoint is
+retained initially for runner reachability; the container is not public.
 
 Use modules from the start.
 
@@ -225,21 +254,12 @@ Every requested approval must state:
 
 If additional work becomes necessary during implementation, stop and request a new approval.
 
-## Planned platform architecture phase
+## Platform architecture decision
 
-A Platform Architect role may be introduced later, before meaningful platform-design decisions.
-
-Its design method will require multiple complete alternatives and comparison across:
-- CapEx: configuration and first-run cost,
-- OpEx: usage cost,
-- OpEx: maintenance cost,
-- OpEx: integration/software-engineering implementation cost,
-- developer-team usability,
-- pros,
-- cons,
-- decision drivers.
-
-The role must not recommend an option until the alternatives have been compared.
+The Platform Architect compared three complete alternatives. Option B was
+selected on 2026-08-29. The ADR is the implementation handoff to the DevOps
+Builder. Any departure from its topology, paid SKU assumptions, identity model,
+or explicit deferrals requires a new atomic approval gate.
 
 ## Cleanup
 

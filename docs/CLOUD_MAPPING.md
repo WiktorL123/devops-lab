@@ -11,9 +11,11 @@ This document exists so future AWS/GCP variants preserve the same lab intent rat
 | Container registry | Azure Container Registry | ECR | Artifact Registry |
 | Runtime secrets | Azure Key Vault | Secrets Manager | Secret Manager |
 | Terraform remote state | Azure Blob Storage | S3-based backend | Cloud Storage backend |
+| Private database networking | delegated subnet and private DNS for PostgreSQL Flexible Server | private RDS subnets and DNS | private IP for Cloud SQL |
 | Public frontend ingress | Container Apps ingress with a custom domain | custom domain over service/ALB/App Runner endpoint | custom domain over Cloud Run ingress |
 | Public TLS certificate | free Container Apps managed certificate | provider-managed certificate candidate | provider-managed certificate candidate |
 | Inter-service routing | internal Container Apps communication | private service routing candidate | private service routing candidate |
+| Platform logs | Log Analytics workspace | CloudWatch Logs | Cloud Logging |
 | Default CI/CD | GitHub Actions | GitHub Actions | GitHub Actions |
 | Alternative CI/CD | Azure Pipelines | provider-specific alternative if requested | provider-specific alternative if requested |
 
@@ -38,3 +40,9 @@ This document exists so future AWS/GCP variants preserve the same lab intent rat
 Domain registration and DNS hosting are separate capabilities. The active Azure
 profile may use an existing external DNS provider; Azure DNS is optional and
 must not be introduced solely because the runtime is hosted in Azure.
+
+The selected Azure implementation uses the balanced private-data-plane profile:
+a VNet-integrated Container Apps environment, a public frontend, an internal
+backend, private PostgreSQL, and no additional paid edge proxy. The equivalent
+future-cloud profiles should preserve those trust boundaries without copying
+Azure-specific subnet or DNS mechanics unnecessarily.

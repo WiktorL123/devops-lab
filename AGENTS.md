@@ -87,6 +87,8 @@ Current Azure mapping:
 - Azure Blob Storage for Terraform remote state
 - Azure Container Apps ingress with a custom public frontend domain
 - a free Azure Container Apps managed TLS certificate for the frontend domain
+- customer VNet integration and private PostgreSQL networking
+- Azure Log Analytics for initial platform troubleshooting
 
 The platform-generated Azure Container Apps FQDN remains a technical endpoint,
 but it is not the intended public application address. The backend does not need
@@ -96,7 +98,14 @@ The domain registration and control of its DNS records are external
 prerequisites. Azure DNS remains optional; prefer the existing DNS provider when
 it is sufficient and cheaper for the lab.
 
-Monitoring/observability is not part of the initial core scope.
+The approved Azure platform is Option B from
+`docs/architecture/ADR-001-platform-architecture.md`: `polandcentral`, public
+frontend, internal backend, private PostgreSQL, ACR Basic, Key Vault Standard,
+Consumption Container Apps, and no additional paid edge proxy. Architecture
+selection does not itself authorize Terraform or Azure provisioning.
+
+Baseline Container Apps logging in Log Analytics is part of the selected core
+scope. Broader monitoring/observability remains optional.
 AKS is optional and should not be introduced unless explicitly requested.
 
 ## CI/CD strategy
@@ -136,6 +145,13 @@ Do not run Prisma migrations implicitly as container startup behavior.
 Start with local Terraform state.
 
 A planned learning stage migrates state to Azure Blob Storage.
+
+The migration target is a dedicated StorageV2 `Standard_LRS` account and private
+blob container in a separate state resource group. Use Entra ID/OIDC data-plane
+authorization, disable Shared Key authorization, and enable blob versioning plus
+blob/container soft delete. Keep the blob endpoint reachable by GitHub-hosted
+runners initially; a public service endpoint does not imply anonymous container
+access. Never destroy the state backend before the managed infrastructure.
 
 Terraform modules are used from the beginning.
 Prefer modules around meaningful capabilities rather than blindly wrapping every individual Azure resource.
@@ -218,9 +234,9 @@ Detailed instructions live under `.agents/roles/`.
 - **Azure Troubleshooter**: diagnoses Azure, Terraform, deployment, and pipeline failures.
 - **Platform Architect**: compares complete platform alternatives and recommends a design before infrastructure implementation.
 
-The Platform Architect is active for the platform-design phase. It must compare
-multiple complete platform alternatives before recommending one. The DevOps
-Builder implements only an architecture approved by the user.
+The Platform Architect completed the initial platform decision. The DevOps
+Builder implements only the approved architecture and must request a new atomic
+approval gate for implementation or for any architectural departure.
 
 See `docs/AGENT_INDEX.md` for routing.
 
