@@ -34,20 +34,26 @@
 - [x] Option B balanced private-data-plane architecture selected
 - [x] Architecture decision and Builder handoff recorded in ADR-001
 - [x] Stage 3 platform architecture completed
+- [x] Stage 4 local Terraform bootstrap change-set approved
+- [x] Local Terraform 1.16.0 and AzureRM 5.2.0 baseline initialized
+- [x] Cross-platform provider lock file generated and bootstrap validated
+- [x] Cross-computer Stage 4 handoff and fresh-session prompt documented
 
 ## In progress
 
-- [ ] Define the first atomic Stage 4 Terraform change-set
-- [ ] Confirm the initial module and `dev` environment boundaries before files
-  are created
+- [ ] Commit and push `terraform-init` before continuing on another computer
+- [ ] Run a read-only local-tool and Azure subscription preflight
+- [ ] Design the principal, GitHub OIDC, and RBAC bootstrap
 
 ## Next
 
-Use the DevOps Builder for Stage 4. First propose the initial Terraform
-repository structure and local-state bootstrap as one atomic change-set. Explain
-the module/environment boundary and validation behavior, then wait for approval
-before creating `infra/**`. Do not provision Azure resources in the structural
-bootstrap change-set.
+For a new computer/session, follow
+`docs/handoffs/STAGE_4_TERRAFORM_HANDOFF.md` and use
+`docs/handoffs/NEXT_SESSION_PROMPT.md`. After the branch is available remotely,
+perform a read-only tools/subscription preflight and design the principal/OIDC/
+RBAC bootstrap. Principal creation, role assignment, the first resource module,
+`plan`, and `apply` remain separately gated. Do not provision Azure resources
+without explicit approval.
 
 Stage 2 implementation:
 
