@@ -1,0 +1,7 @@
+subscription_id = "00000000-0000-0000-0000-000000000000"
+
+# The remaining values match the approved dev architecture and may be omitted
+# while their defaults remain unchanged.
+project_name = "devopslab"
+environment  = "dev"
+location     = "polandcentral"
