@@ -48,13 +48,16 @@ Application architecture is deliberately secondary.
 
 ## Budget
 
-The promotional Azure credit currently observed for this lab is **$175**.
+The Azure Portal balance currently observed for this lab is **EUR 175.72**, with
+an expiry date of **2026-09-24**. This was confirmed by the repository owner on
+2026-08-31.
 
 This is contextual information, not a permanent constant.
 
 Agents must:
 - treat available credit as dynamic account state,
-- never assume `$200`,
+- never assume a nominal USD promotional amount or convert the confirmed portal
+  balance unless a comparison explicitly requires it,
 - ask for the current balance or read it through approved tooling when a cost-sensitive decision depends on it,
 - distinguish current remaining credit from the original promotional grant.
 

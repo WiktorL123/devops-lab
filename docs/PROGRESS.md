@@ -4,6 +4,9 @@
 
 **Stage 4 - Initial Terraform with local state**
 
+Current Azure Portal balance reported on 2026-08-31: **EUR 175.72**, expiring
+2026-09-24. Treat this as dynamic account state.
+
 ## Completed
 
 - [x] Lab scope defined
@@ -38,22 +41,27 @@
 - [x] Local Terraform 1.16.0 and AzureRM 5.2.0 baseline initialized
 - [x] Cross-platform provider lock file generated and bootstrap validated
 - [x] Cross-computer Stage 4 handoff and fresh-session prompt documented
+- [x] Read-only local-tool and Azure subscription preflight completed
+- [x] Required Azure Resource Providers registered
+- [x] GitHub OIDC and Azure RBAC bootstrap script prepared for owner execution
+- [x] GitHub OIDC and constrained Azure RBAC bootstrap executed and verified
 
 ## In progress
 
-- [ ] Commit and push `terraform-init` before continuing on another computer
-- [ ] Run a read-only local-tool and Azure subscription preflight
-- [ ] Design the principal, GitHub OIDC, and RBAC bootstrap
+- [x] Commit and push `terraform-init` before continuing on another computer
+- [x] Run a read-only local-tool and Azure subscription preflight
+- [x] Design the principal, GitHub OIDC, and RBAC bootstrap
+- [x] Review and execute the principal, GitHub OIDC, and RBAC bootstrap
+- [ ] Design the first meaningful Terraform capability module
 
 ## Next
 
 For a new computer/session, follow
 `docs/handoffs/STAGE_4_TERRAFORM_HANDOFF.md` and use
 `docs/handoffs/NEXT_SESSION_PROMPT.md`. After the branch is available remotely,
-perform a read-only tools/subscription preflight and design the principal/OIDC/
-RBAC bootstrap. Principal creation, role assignment, the first resource module,
-`plan`, and `apply` remain separately gated. Do not provision Azure resources
-without explicit approval.
+design the first meaningful Terraform capability module. Module implementation,
+`plan`, and `apply` remain separately gated. Do not provision additional Azure
+resources without explicit approval.
 
 Stage 2 implementation:
 
