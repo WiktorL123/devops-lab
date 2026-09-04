@@ -41,5 +41,7 @@ terraform validate
 Do not commit `terraform.tfvars`, local state, saved plans, `.terraform/`, or
 credentials. The provider dependency lock file is committed intentionally.
 
-No Azure resource is defined by the initial bootstrap. `plan` and `apply` begin
-only in later atomic change-sets.
+The first approved capability module defines the `dev` network: a VNet,
+dedicated delegated subnets for Container Apps and PostgreSQL Flexible Server,
+and PostgreSQL private DNS linked to the VNet. Running `plan` and `apply`
+remains subject to separate atomic approval gates.

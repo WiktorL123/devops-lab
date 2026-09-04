@@ -46,9 +46,9 @@ Aktualny stan kredytu z Azure Portal to 175,72 EUR, ważne do 24 września 2026.
 Tenant Kainos jest całkowicie poza zakresem; jedynym tenantem operacyjnym jest
 prywatny tenant devops-lab.
 
-Następna praca ma rozpocząć się od zaprojektowania pierwszego znaczącego modułu
-Terraform. Nie łącz automatycznie projektu modułu, implementacji, terraform
-plan ani terraform apply. Każde z nich pozostaje osobno bramkowane.
+Change-set #19 zaimplementował i zwalidował pierwszy znaczący moduł Terraform:
+`network`. Następną pracą jest osobno bramkowany, lokalny `terraform plan` dla
+sieci. Nie uruchamiaj `terraform plan` ani `terraform apply` bez osobnej zgody.
 
 Przestrzegaj atomic approval gate. Przed każdą zmianą opisz cel, pliki lub
 zasoby, zachowanie oraz zakres wyłączony i poczekaj na moją wyraźną zgodę.

@@ -45,6 +45,7 @@ Current Azure Portal balance reported on 2026-08-31: **EUR 175.72**, expiring
 - [x] Required Azure Resource Providers registered
 - [x] GitHub OIDC and Azure RBAC bootstrap script prepared for owner execution
 - [x] GitHub OIDC and constrained Azure RBAC bootstrap executed and verified
+- [x] First meaningful Terraform capability module (`network`) implemented and validated
 
 ## In progress
 
@@ -52,16 +53,17 @@ Current Azure Portal balance reported on 2026-08-31: **EUR 175.72**, expiring
 - [x] Run a read-only local-tool and Azure subscription preflight
 - [x] Design the principal, GitHub OIDC, and RBAC bootstrap
 - [x] Review and execute the principal, GitHub OIDC, and RBAC bootstrap
-- [ ] Design the first meaningful Terraform capability module
+- [x] Design and implement the first meaningful Terraform capability module
+- [ ] Review a local Terraform plan for the network module
 
 ## Next
 
 For a new computer/session, follow
 `docs/handoffs/STAGE_4_TERRAFORM_HANDOFF.md` and use
 `docs/handoffs/NEXT_SESSION_PROMPT.md`. After the branch is available remotely,
-design the first meaningful Terraform capability module. Module implementation,
-`plan`, and `apply` remain separately gated. Do not provision additional Azure
-resources without explicit approval.
+review the first local Terraform plan for the network module. `plan` and
+`apply` remain separately gated. Do not provision additional Azure resources
+without explicit approval.
 
 Stage 2 implementation:
 
