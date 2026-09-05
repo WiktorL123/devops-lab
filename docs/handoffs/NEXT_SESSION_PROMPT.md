@@ -28,11 +28,12 @@ Następnie wykonaj wyłącznie odczytowe sprawdzenie:
 
 - aktualnego brancha i git status,
 - wersji Terraform,
-- obecności bootstrapu infra/environments/dev i skryptu identity bootstrap,
+- obecności rootu infra/environments/dev, konfiguracji backendu Azure Blob,
+  bootstrapu infra/bootstrap/tfstate i skryptu identity bootstrap,
 - zgodności bieżącego stanu z PROGRESS i handoffem.
 
 Ustal aktualny etap projektu i wybierz właściwą rolę. Oczekiwany etap to
-Stage 4 — Initial Terraform with local state, a oczekiwana rola to DevOps
+Stage 4 — Initial Terraform with Azure Blob remote state, a oczekiwana rola to DevOps
 Builder. Jeśli stan repozytorium wskazuje inaczej, zgłoś rozbieżność zamiast ją
 samodzielnie naprawiać.
 
@@ -42,13 +43,19 @@ jednorazowy bootstrap GitHub OIDC/RBAC. Utworzono application resource group,
 cztery GitHub managed identities, cztery federated credentials i bazowe role
 plan/apply. Nie utworzono płatnych usług ani client secretów.
 
-Aktualny stan kredytu z Azure Portal to 175,72 EUR, ważne do 24 września 2026.
+Aktualny stan kredytu z Azure Portal to 171,72 EUR, ważne do 24 września 2026.
 Tenant Kainos jest całkowicie poza zakresem; jedynym tenantem operacyjnym jest
 prywatny tenant devops-lab.
 
 Change-set #19 zaimplementował i zwalidował pierwszy znaczący moduł Terraform:
-`network`. Następną pracą jest osobno bramkowany, lokalny `terraform plan` dla
-sieci. Nie uruchamiaj `terraform plan` ani `terraform apply` bez osobnej zgody.
+`network`. Change-sety #20 i #21 sprawdziły i zastosowały lokalny plan pięciu
+zasobów sieciowych. Change-sety #23-#27 zaprojektowały, sprawdziły i zastosowały
+oddzielny bootstrap Azure Blob. Change-sety #28 i #29 zmigrowały pięć zasobów
+sieciowych do `tfstate/dev/terraform.tfstate` i potwierdziły końcowy plan bez
+zmian. Bootstrap zachowuje osobny lokalny state. Następną pracą jest wybór i
+projekt kolejnego modułu Azure foundation; Log Analytics jest kandydatem ze
+względu na przyszłą zależność Container Apps Environment. Implementacja, plan i
+apply pozostają osobno bramkowane.
 
 Przestrzegaj atomic approval gate. Przed każdą zmianą opisz cel, pliki lub
 zasoby, zachowanie oraz zakres wyłączony i poczekaj na moją wyraźną zgodę.

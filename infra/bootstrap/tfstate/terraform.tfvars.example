@@ -1,0 +1,25 @@
+subscription_id = "00000000-0000-0000-0000-000000000000"
+
+state_principals = {
+  terraform-plan = {
+    principal_id   = "00000000-0000-0000-0000-000000000000"
+    principal_type = "ServicePrincipal"
+  }
+  terraform-apply = {
+    principal_id   = "00000000-0000-0000-0000-000000000000"
+    principal_type = "ServicePrincipal"
+  }
+  migration-user = {
+    principal_id   = "00000000-0000-0000-0000-000000000000"
+    principal_type = "User"
+  }
+}
+
+# These values match the approved backend design and may be omitted while
+# their defaults remain unchanged.
+project_name         = "devopslab"
+environment          = "dev"
+location             = "polandcentral"
+resource_group_name  = "rg-devopslab-tfstate-polandcentral"
+storage_account_name = "stdevopslabtfstate190c1f"
+container_name       = "tfstate"

@@ -1,0 +1,7 @@
+resource_group_name  = "rg-devopslab-tfstate-polandcentral"
+storage_account_name = "stdevopslabtfstate190c1f"
+container_name       = "tfstate"
+key                  = "dev/terraform.tfstate"
+subscription_id      = "3576b704-1a6d-4cfa-b9cc-16d0c7190c1f"
+tenant_id            = "476b2b20-5ec7-402a-8783-8bf8941c3656"
+use_azuread_auth     = true
