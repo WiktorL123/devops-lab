@@ -46,6 +46,9 @@ Current Azure Portal balance reported on 2026-08-31: **EUR 175.72**, expiring
 - [x] GitHub OIDC and Azure RBAC bootstrap script prepared for owner execution
 - [x] GitHub OIDC and constrained Azure RBAC bootstrap executed and verified
 - [x] First meaningful Terraform capability module (`network`) implemented and validated
+- [x] Local Terraform network plan reviewed: 5 to add, 0 to change, 0 to destroy
+- [x] Network plan applied successfully with local Terraform state
+- [x] Dedicated Azure Blob remote-state bootstrap implemented and validated
 
 ## In progress
 
@@ -54,16 +57,18 @@ Current Azure Portal balance reported on 2026-08-31: **EUR 175.72**, expiring
 - [x] Design the principal, GitHub OIDC, and RBAC bootstrap
 - [x] Review and execute the principal, GitHub OIDC, and RBAC bootstrap
 - [x] Design and implement the first meaningful Terraform capability module
-- [ ] Review a local Terraform plan for the network module
+- [x] Review and apply the local Terraform network plan
+- [x] Design and preflight the dedicated Azure Blob remote-state backend
+- [ ] Review a saved Terraform plan for the remote-state bootstrap
 
 ## Next
 
 For a new computer/session, follow
 `docs/handoffs/STAGE_4_TERRAFORM_HANDOFF.md` and use
 `docs/handoffs/NEXT_SESSION_PROMPT.md`. After the branch is available remotely,
-review the first local Terraform plan for the network module. `plan` and
-`apply` remain separately gated. Do not provision additional Azure resources
-without explicit approval.
+review a saved Terraform plan for the dedicated Azure Blob remote-state
+bootstrap. Backend `plan`, `apply`, and state migration remain separately gated.
+Do not provision additional Azure resources without explicit approval.
 
 Stage 2 implementation:
 

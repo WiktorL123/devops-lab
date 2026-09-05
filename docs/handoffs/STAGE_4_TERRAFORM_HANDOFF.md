@@ -11,9 +11,9 @@ repository changes, Azure mutations, role assignments, Terraform `plan` or
 
 ## Repository handoff
 
-- Expected branch for the next Stage 4 work: `terraform-network`.
-- The branch was created from `main` after the Terraform and Azure identity
-  bootstrap was reviewed and merged at commit `74fdde9`.
+- Expected branch for the next Stage 4 work: `terraform-remote_state`.
+- The branch was created from `main` after the Terraform network configuration
+  was reviewed and merged at commit `a3b0cc9`.
 - On the current computer, verify the checked-out branch and worktree before
   continuing. If work later moves to another computer, the repository owner
   must first review, commit, and push the branch, then fetch and check it out on
@@ -127,6 +127,34 @@ Atomic change-set #19 implemented the first capability module:
 - formatting and local validation completed without running `plan`, `apply`, or
   changing Azure.
 
+Atomic change-sets #20 and #21 reviewed and applied the first local network
+plan:
+
+- the reviewed plan contained 5 resources to add, 0 to change, and 0 to
+  destroy;
+- local apply created `vnet-devopslab-dev-polandcentral`;
+- it created the delegated `snet-container-apps` and `snet-postgres` subnets;
+- it created `devopslab-dev.private.postgres.database.azure.com` and linked the
+  private DNS zone to the VNet;
+- Terraform outputs and local state were verified after apply;
+- the state remains local and must not be deleted before its separately
+  approved migration to Azure Blob Storage.
+
+Atomic change-sets #23 and #24 completed the remote-state preflight and code:
+
+- the private tenant, enabled subscription, `Owner` access, registered
+  `Microsoft.Storage` provider, and Poland Central availability were confirmed;
+- `stdevopslabtfstate190c1f` was available when checked;
+- the reported Azure credit was EUR 171.72, expiring 2026-09-24;
+- `infra/bootstrap/tfstate` is an independent root that retains local state;
+- `infra/modules/storage` defines Standard LRS state storage, a private
+  container, versioning, 14-day blob/container soft delete, and data-plane
+  RBAC;
+- plan/apply identities and the migration user receive `Storage Blob Data
+  Contributor` at container scope;
+- implementation and local validation did not plan, create, or migrate Azure
+  resources.
+
 ## Decisions already accepted
 
 - Architecture: Option B from ADR-001.
@@ -150,12 +178,12 @@ resources, role assignments, Terraform modules, `plan`, or `apply`.
 The next work remains inside Stage 4. An atomic gate is a unit of approval, not
 a new project stage.
 
-1. Review the first local Terraform plan for the network module through a
+1. Review a saved Terraform plan for the remote-state bootstrap through a
    dedicated atomic gate.
-2. Treat `terraform plan` as a separate reviewed action. A plan must not be
-   interpreted as approval for apply.
-3. Request a separate explicit gate before the first `terraform apply`, stating
-   every resource and paid SKU expected to be created.
+2. Treat backend `terraform apply` as a separate reviewed action and allow time
+   to verify data-plane RBAC propagation.
+3. Configure the `dev` root backend and run `terraform init -migrate-state`
+   only through a later, explicit migration gate.
 
 Do not silently combine the identity/RBAC bootstrap, infrastructure code,
 `plan`, and `apply` into one approval. If preflight reveals a new architectural
@@ -188,8 +216,8 @@ and remain Terraform-managed.
 
 - additional principals, managed identities, federated credentials, role
   assignments, or resource groups;
-- paid or free Azure service resources beyond the completed bootstrap;
-- Terraform resource/module implementation beyond the completed bootstrap;
+- paid or free Azure service resources beyond the completed network;
+- Terraform resource/module implementation beyond the completed network;
 - `terraform plan`, `apply`, import, state migration, or destroy;
 - GitHub environments, variables, secrets, or workflow changes;
 - DNS records, domain validation, or certificates;

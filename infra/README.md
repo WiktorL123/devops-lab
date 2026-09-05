@@ -6,6 +6,8 @@ This directory contains the Azure infrastructure for `devops-lab`.
 
 ```text
 infra/
+├── bootstrap/
+│   └── tfstate/   # independent root for the remote-state infrastructure
 ├── environments/
 │   └── dev/       # root module for the selected dev platform
 └── modules/       # reusable capability modules added incrementally
@@ -15,10 +17,34 @@ infra/
 provider configuration, local state during Stage 4, and calls to capability
 modules as those modules are approved and implemented.
 
-The future remote-state bootstrap is deliberately separate from this root. A
-later stage will create the dedicated state resource group, Storage Account, and
-blob container before migrating this root to the `azurerm` backend. The state
-backend must not be managed by the state that depends on it.
+The remote-state bootstrap is deliberately separate from this root. The
+`bootstrap/tfstate` root retains its own local state and defines the dedicated
+state resource group, Storage Account, blob container, and data-plane RBAC. The
+state backend must not be managed by the application state that depends on it.
+
+## Remote-state bootstrap
+
+Create an untracked variables file and replace the subscription and principal
+ID placeholders with the values confirmed during the read-only preflight:
+
+```bash
+cd infra/bootstrap/tfstate
+cp terraform.tfvars.example terraform.tfvars
+```
+
+Initialize and validate the bootstrap without configuring a remote backend:
+
+```bash
+terraform init -backend=false
+terraform fmt -check -recursive ../..
+terraform validate
+```
+
+The bootstrap code does not migrate `environments/dev/terraform.tfstate`.
+Backend planning, apply, RBAC propagation checks, and `init -migrate-state` are
+separate approval gates. Preserve the bootstrap's local state until the final
+cleanup, when the application infrastructure and its remote state have already
+been handled.
 
 ## Local bootstrap
 

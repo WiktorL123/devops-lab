@@ -47,8 +47,11 @@ Tenant Kainos jest całkowicie poza zakresem; jedynym tenantem operacyjnym jest
 prywatny tenant devops-lab.
 
 Change-set #19 zaimplementował i zwalidował pierwszy znaczący moduł Terraform:
-`network`. Następną pracą jest osobno bramkowany, lokalny `terraform plan` dla
-sieci. Nie uruchamiaj `terraform plan` ani `terraform apply` bez osobnej zgody.
+`network`. Change-sety #20 i #21 sprawdziły i zastosowały lokalny plan pięciu
+zasobów sieciowych. Change-sety #23 i #24 zakończyły read-only preflight oraz
+implementację oddzielnego bootstrapu Azure Blob. Stan sieci nadal pozostaje
+lokalny. Następną pracą jest zapisany `terraform plan` bootstrapu. Backend
+`apply` i `init -migrate-state` pozostają osobno bramkowane.
 
 Przestrzegaj atomic approval gate. Przed każdą zmianą opisz cel, pliki lub
 zasoby, zachowanie oraz zakres wyłączony i poczekaj na moją wyraźną zgodę.

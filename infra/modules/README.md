@@ -16,8 +16,9 @@ Planned capability boundaries for the accepted platform architecture:
 - `container-app-environment`: the VNet-integrated Container Apps environment;
 - `container-app`: one reusable workload module instantiated for frontend and
   backend;
-- `storage`: the later, separately bootstrapped Terraform-state storage
-  capability.
+- `storage`: the separately bootstrapped Terraform-state Storage Account,
+  private container, retention controls, and data-plane RBAC (implemented in
+  change-set #24).
 
 The `dev` root composes these modules and owns cross-capability wiring. Role
 assignments are placed with the capability whose access they grant unless a
