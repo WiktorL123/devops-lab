@@ -11,22 +11,22 @@ repository changes, Azure mutations, role assignments, Terraform `plan` or
 
 ## Repository handoff
 
-- Expected branch: `terraform-init`.
-- Before moving to another computer, the repository owner must review, commit,
-  and push the current branch.
-- On the other computer, fetch the remote branch and verify both the checked-out
-  branch and worktree before continuing.
+- Expected branch for the next Stage 4 work: `terraform-network`.
+- The branch was created from `main` after the Terraform and Azure identity
+  bootstrap was reviewed and merged at commit `74fdde9`.
+- On the current computer, verify the checked-out branch and worktree before
+  continuing. If work later moves to another computer, the repository owner
+  must first review, commit, and push the branch, then fetch and check it out on
+  the destination computer.
 - Agents never commit, push, or merge unless the user explicitly authorizes the
   specific operation. Agents never merge pull requests.
 
-Suggested read-only checks on the new computer:
+Suggested read-only checks at the start of a new session:
 
 ```bash
-git fetch
-git switch terraform-init
-git pull --ff-only
 git branch --show-current
 git status --short
+git log -1 --oneline --decorate
 terraform version
 ```
 
@@ -116,6 +116,17 @@ The bootstrap implementation and operating guide are in
 `scripts/bootstrap-azure-identity.ps1` and
 `docs/bootstrap/AZURE_IDENTITY_BOOTSTRAP.md`.
 
+Atomic change-set #19 implemented the first capability module:
+
+- `infra/modules/network` owns the VNet, delegated Container Apps and
+  PostgreSQL subnets, PostgreSQL private DNS zone, and VNet link;
+- the `dev` root uses `10.20.0.0/16`, a `/23` Container Apps subnet, and a
+  `/28` PostgreSQL subnet;
+- the existing application resource group remains a module input and is not
+  recreated;
+- formatting and local validation completed without running `plan`, `apply`, or
+  changing Azure.
+
 ## Decisions already accepted
 
 - Architecture: Option B from ADR-001.
@@ -139,13 +150,11 @@ resources, role assignments, Terraform modules, `plan`, or `apply`.
 The next work remains inside Stage 4. An atomic gate is a unit of approval, not
 a new project stage.
 
-1. Design the first meaningful Terraform capability module and its exact
-   resource boundary.
-2. Present a dedicated atomic gate before implementing the module or Azure
-   resource definitions.
-3. Treat `terraform plan` as a separate reviewed action. A plan must not be
+1. Review the first local Terraform plan for the network module through a
+   dedicated atomic gate.
+2. Treat `terraform plan` as a separate reviewed action. A plan must not be
    interpreted as approval for apply.
-4. Request a separate explicit gate before the first `terraform apply`, stating
+3. Request a separate explicit gate before the first `terraform apply`, stating
    every resource and paid SKU expected to be created.
 
 Do not silently combine the identity/RBAC bootstrap, infrastructure code,

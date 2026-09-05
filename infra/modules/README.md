@@ -6,7 +6,8 @@ Azure resources.
 
 Planned capability boundaries for the accepted platform architecture:
 
-- `network`: VNet, delegated subnets, PostgreSQL private DNS, and VNet links;
+- `network`: VNet, delegated subnets, PostgreSQL private DNS, and VNet links
+  (implemented for the `dev` root in change-set #19);
 - `log-analytics`: the baseline workspace and ingestion safeguards;
 - `identity`: user-assigned managed identities and federated credentials;
 - `acr`: Azure Container Registry and registry-specific configuration;
