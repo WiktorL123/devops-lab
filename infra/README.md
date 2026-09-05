@@ -14,8 +14,9 @@ infra/
 ```
 
 `environments/dev` is the composition root. It owns environment-level inputs,
-provider configuration, local state during Stage 4, and calls to capability
-modules as those modules are approved and implemented.
+provider and backend configuration, and calls to capability modules as those
+modules are approved and implemented. Its state is stored remotely in the
+dedicated Azure Blob backend.
 
 The remote-state bootstrap is deliberately separate from this root. The
 `bootstrap/tfstate` root retains its own local state and defines the dedicated
@@ -40,13 +41,12 @@ terraform fmt -check -recursive ../..
 terraform validate
 ```
 
-The bootstrap code does not migrate `environments/dev/terraform.tfstate`.
-Backend planning, apply, RBAC propagation checks, and `init -migrate-state` are
-separate approval gates. Preserve the bootstrap's local state until the final
-cleanup, when the application infrastructure and its remote state have already
-been handled.
+The bootstrap was applied before the `dev` state was migrated. Preserve the
+bootstrap's local state until final cleanup, when the application infrastructure
+and its remote state have already been handled. Do not configure this bootstrap
+to depend on the backend that it owns.
 
-## Local bootstrap
+## Dev environment root
 
 Create an untracked variables file from the committed example and replace the
 placeholder subscription ID:
@@ -56,18 +56,22 @@ cd infra/environments/dev
 cp terraform.tfvars.example terraform.tfvars
 ```
 
-Initialize and validate without contacting Azure:
+Initialize the committed Azure Blob backend configuration and validate:
 
 ```bash
-terraform init -backend=false
+terraform init -backend-config=backend.tfbackend
 terraform fmt -check -recursive ../..
 terraform validate
 ```
 
+The initial local state was migrated with `terraform init -migrate-state` after
+the backend was provisioned and its data-plane RBAC was verified. Do not use
+`-backend=false` for normal `dev` plans or applies after this migration.
+
 Do not commit `terraform.tfvars`, local state, saved plans, `.terraform/`, or
 credentials. The provider dependency lock file is committed intentionally.
 
-The first approved capability module defines the `dev` network: a VNet,
-dedicated delegated subnets for Container Apps and PostgreSQL Flexible Server,
-and PostgreSQL private DNS linked to the VNet. Running `plan` and `apply`
-remains subject to separate atomic approval gates.
+The first approved capability module defines the deployed `dev` network: a
+VNet, dedicated delegated subnets for Container Apps and PostgreSQL Flexible
+Server, and PostgreSQL private DNS linked to the VNet. Running `plan` and
+`apply` remains subject to separate atomic approval gates.

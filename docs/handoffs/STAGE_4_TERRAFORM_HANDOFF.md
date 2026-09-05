@@ -11,9 +11,9 @@ repository changes, Azure mutations, role assignments, Terraform `plan` or
 
 ## Repository handoff
 
-- Expected branch for the next Stage 4 work: `terraform-remote_state`.
-- The branch was created from `main` after the Terraform network configuration
-  was reviewed and merged at commit `a3b0cc9`.
+- Current review branch: `terraform-remote_state`.
+- After the repository owner merges this branch, the next Stage 4 branch must
+  be created from the updated `main`; its name is not selected by this handoff.
 - On the current computer, verify the checked-out branch and worktree before
   continuing. If work later moves to another computer, the repository owner
   must first review, commit, and push the branch, then fetch and check it out on
@@ -50,7 +50,7 @@ The active role for the next implementation work is **DevOps Builder**.
 
 ## Current project state
 
-- Current stage: **Stage 4 — Initial Terraform with local state**.
+- Current stage: **Stage 4 — Initial Terraform with Azure Blob remote state**.
 - Stage 3 selected Option B, the balanced private-data-plane architecture, in
   `polandcentral`.
 - The public application hostname will be `app.devopslab.com.pl`; DNS remains
@@ -59,7 +59,7 @@ The active role for the next implementation work is **DevOps Builder**.
 - PostgreSQL is private. ACR and Key Vault initially retain public service
   endpoints protected by identity and RBAC.
 - GitHub Actions is the only active CI/CD provider.
-- The Azure Portal balance reported on 2026-08-31 is EUR 175.72 and expires on
+- The Azure Portal balance reported on 2026-09-05 is EUR 171.72 and expires on
   2026-09-24. This is dynamic account state and must be rechecked before a
   cost-sensitive decision or provisioning.
 
@@ -137,8 +137,8 @@ plan:
 - it created `devopslab-dev.private.postgres.database.azure.com` and linked the
   private DNS zone to the VNet;
 - Terraform outputs and local state were verified after apply;
-- the state remains local and must not be deleted before its separately
-  approved migration to Azure Blob Storage.
+- the state initially remained local pending its separately approved migration
+  to Azure Blob Storage.
 
 Atomic change-sets #23 and #24 completed the remote-state preflight and code:
 
@@ -155,12 +155,38 @@ Atomic change-sets #23 and #24 completed the remote-state preflight and code:
 - implementation and local validation did not plan, create, or migrate Azure
   resources.
 
+Atomic change-sets #25 through #27 reviewed, hardened, and applied the
+remote-state bootstrap:
+
+- the saved plan created 6 resources and contained no changes or destroys;
+- local-user authentication was explicitly disabled before the final plan;
+- `rg-devopslab-tfstate-polandcentral`, Storage Account
+  `stdevopslabtfstate190c1f`, and private container `tfstate` were created;
+- Shared Key and anonymous blob access are disabled, while OAuth, HTTPS,
+  minimum TLS 1.2, blob versioning, and 14-day blob/container soft delete are
+  enabled;
+- plan/apply identities and the migration user have `Storage Blob Data
+  Contributor` at container scope;
+- the bootstrap retains its independent local state.
+
+Atomic change-sets #28 and #29 migrated and verified the main `dev` state:
+
+- a hash-verified local pre-migration backup was preserved and remains ignored;
+- `terraform init -migrate-state` copied the state to
+  `tfstate/dev/terraform.tfstate`;
+- the remote state retained lineage
+  `1fa8166a-4e09-7c7f-4d79-40650979e62c` and all five network resources;
+- blob versioning produced recoverable versions during migration;
+- an Azure-normalized Container Apps subnet delegation action was added to the
+  configuration;
+- the final remote-backed Terraform plan reported no changes.
+
 ## Decisions already accepted
 
 - Architecture: Option B from ADR-001.
 - Initial environment: `dev` only.
-- Terraform starts with local state.
-- A later learning stage migrates state to a dedicated Azure Storage Account.
+- Terraform started with local state and has been migrated to the dedicated
+  Azure Storage Account.
 - GitHub authenticates to Azure through OIDC, without a long-lived client
   secret.
 - Plan, apply, frontend deployment, and backend deployment use separated
@@ -170,7 +196,7 @@ Atomic change-sets #23 and #24 completed the remote-state preflight and code:
   for frontend and backend.
 - The first real application deployment occurs through CI/CD.
 
-The completed bootstrap authorization does not authorize additional Azure
+The completed network and remote-state work does not authorize additional Azure
 resources, role assignments, Terraform modules, `plan`, or `apply`.
 
 ## Next work sequence
@@ -178,12 +204,11 @@ resources, role assignments, Terraform modules, `plan`, or `apply`.
 The next work remains inside Stage 4. An atomic gate is a unit of approval, not
 a new project stage.
 
-1. Review a saved Terraform plan for the remote-state bootstrap through a
-   dedicated atomic gate.
-2. Treat backend `terraform apply` as a separate reviewed action and allow time
-   to verify data-plane RBAC propagation.
-3. Configure the `dev` root backend and run `terraform init -migrate-state`
-   only through a later, explicit migration gate.
+1. Select and design the next meaningful Azure foundation capability module;
+   Log Analytics is the next dependency candidate for the future Container Apps
+   environment.
+2. Present a dedicated atomic gate before implementing the selected module.
+3. Treat its Terraform plan and apply as separate reviewed actions.
 
 Do not silently combine the identity/RBAC bootstrap, infrastructure code,
 `plan`, and `apply` into one approval. If preflight reveals a new architectural
@@ -203,8 +228,8 @@ ADR-001 and `PLATFORM_OPTIONS.md` define the intended identities:
 The implemented design preserves least privilege and avoids subscription-wide
 Contributor or Owner for GitHub. The apply identity has Contributor and
 conditioned role-assignment administration only at the application
-resource-group scope. The plan identity is read-only for infrastructure and
-later receives only the state-container data-plane access it needs.
+resource-group scope. The plan identity is read-only for infrastructure, and
+both Terraform identities have state-container data-plane access.
 
 The frontend and backend deployment identities can authenticate through GitHub
 OIDC but currently have no ACR or Container Apps roles. Those target resources
@@ -216,8 +241,10 @@ and remain Terraform-managed.
 
 - additional principals, managed identities, federated credentials, role
   assignments, or resource groups;
-- paid or free Azure service resources beyond the completed network;
-- Terraform resource/module implementation beyond the completed network;
+- paid or free Azure service resources beyond the completed network and state
+  backend;
+- Terraform resource/module implementation beyond the completed network and
+  state backend;
 - `terraform plan`, `apply`, import, state migration, or destroy;
 - GitHub environments, variables, secrets, or workflow changes;
 - DNS records, domain validation, or certificates;

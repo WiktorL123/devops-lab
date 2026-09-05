@@ -14,6 +14,7 @@ resource "azurerm_storage_account" "this" {
   allow_nested_items_to_be_public  = false
   public_network_access_enabled    = true
   cross_tenant_replication_enabled = false
+  local_user_enabled               = false
 
   blob_properties {
     versioning_enabled = true

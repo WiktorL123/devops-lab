@@ -2,9 +2,9 @@
 
 ## Current stage
 
-**Stage 4 - Initial Terraform with local state**
+**Stage 4 - Initial Terraform with Azure Blob remote state**
 
-Current Azure Portal balance reported on 2026-08-31: **EUR 175.72**, expiring
+Current Azure Portal balance reported on 2026-09-05: **EUR 171.72**, expiring
 2026-09-24. Treat this as dynamic account state.
 
 ## Completed
@@ -49,6 +49,10 @@ Current Azure Portal balance reported on 2026-08-31: **EUR 175.72**, expiring
 - [x] Local Terraform network plan reviewed: 5 to add, 0 to change, 0 to destroy
 - [x] Network plan applied successfully with local Terraform state
 - [x] Dedicated Azure Blob remote-state bootstrap implemented and validated
+- [x] Remote-state bootstrap plan reviewed and security settings tightened
+- [x] Dedicated state resource group, Storage Account, container, and RBAC applied
+- [x] Main `dev` state migrated from local storage to Azure Blob
+- [x] Remote state lineage, five network resources, blob versioning, and no-drift plan verified
 
 ## In progress
 
@@ -59,16 +63,18 @@ Current Azure Portal balance reported on 2026-08-31: **EUR 175.72**, expiring
 - [x] Design and implement the first meaningful Terraform capability module
 - [x] Review and apply the local Terraform network plan
 - [x] Design and preflight the dedicated Azure Blob remote-state backend
-- [ ] Review a saved Terraform plan for the remote-state bootstrap
+- [x] Review and apply the saved Terraform remote-state bootstrap plan
+- [x] Migrate and verify the main `dev` state in Azure Blob
+- [ ] Select and design the next Azure foundation capability module
 
 ## Next
 
 For a new computer/session, follow
 `docs/handoffs/STAGE_4_TERRAFORM_HANDOFF.md` and use
 `docs/handoffs/NEXT_SESSION_PROMPT.md`. After the branch is available remotely,
-review a saved Terraform plan for the dedicated Azure Blob remote-state
-bootstrap. Backend `plan`, `apply`, and state migration remain separately gated.
-Do not provision additional Azure resources without explicit approval.
+select and design the next Azure foundation capability module. Implementation,
+`plan`, and `apply` remain separately gated. Do not provision additional Azure
+resources without explicit approval.
 
 Stage 2 implementation:
 
@@ -129,7 +135,7 @@ High-level only. The Tutor must still reveal/execute one learning task at a time
 - local application/container baseline
 - CI
 - platform architecture alternatives and decision (completed)
-- initial Terraform with local state (current)
+- initial Terraform and Azure Blob state migration (current)
 - Azure infrastructure
 - Terraform state migration to Azure Blob
 - ACR/container delivery
