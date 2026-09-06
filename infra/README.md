@@ -73,5 +73,36 @@ credentials. The provider dependency lock file is committed intentionally.
 
 The first approved capability module defines the deployed `dev` network: a
 VNet, dedicated delegated subnets for Container Apps and PostgreSQL Flexible
-Server, and PostgreSQL private DNS linked to the VNet. Running `plan` and
-`apply` remains subject to separate atomic approval gates.
+Server, and PostgreSQL private DNS linked to the VNet. Further infrastructure
+implementation requires an atomic approval gate. Its pull request runs plan;
+the repository owner's reviewed merge authorizes the automated saved-plan
+apply.
+
+## GitHub Actions workflow
+
+`.github/workflows/infra.yml` is path-scoped to `infra/**` and the workflow
+file. Pull requests run formatting checks, initialize the committed Azure Blob
+backend, validate the configuration, and create a plan using the dedicated
+Terraform plan identity.
+
+After the repository owner reviews and merges a pull request to `main`, the
+workflow creates a fresh plan, retains it as a one-day artifact, and applies
+that exact artifact using the separate Terraform apply identity. Applies for
+the `dev` environment are serialized and are never cancelled in progress.
+
+Both identities authenticate without a client secret through the GitHub
+Environment `dev` and immutable GitHub OIDC federation. The environment defines
+these non-secret variables:
+
+```text
+AZURE_CLIENT_ID_TF_PLAN
+AZURE_CLIENT_ID_TF_APPLY
+AZURE_TENANT_ID
+AZURE_SUBSCRIPTION_ID
+```
+
+The first pull-request plan and post-merge saved-plan apply completed
+successfully with no Terraform changes. A successful no-change run verifies the
+authentication, remote-state, artifact, and execution paths, but does not prove
+resource-mutation permissions until a later approved plan contains a real
+Azure change.

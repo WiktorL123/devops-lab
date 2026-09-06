@@ -11,9 +11,10 @@ repository changes, Azure mutations, role assignments, Terraform `plan` or
 
 ## Repository handoff
 
-- Current review branch: `terraform-remote_state`.
-- After the repository owner merges this branch, the next Stage 4 branch must
-  be created from the updated `main`; its name is not selected by this handoff.
+- Current integrated branch: `main` after the repository owner merged the
+  Terraform pipeline pull request.
+- The next Stage 4 work must start on a new branch created from updated `main`;
+  its name is not selected by this handoff.
 - On the current computer, verify the checked-out branch and worktree before
   continuing. If work later moves to another computer, the repository owner
   must first review, commit, and push the branch, then fetch and check it out on
@@ -59,6 +60,8 @@ The active role for the next implementation work is **DevOps Builder**.
 - PostgreSQL is private. ACR and Key Vault initially retain public service
   endpoints protected by identity and RBAC.
 - GitHub Actions is the only active CI/CD provider.
+- The `infra` workflow now plans Terraform changes on pull requests and applies
+  the exact saved post-merge plan on pushes to `main`.
 - The Azure Portal balance reported on 2026-09-05 is EUR 171.72 and expires on
   2026-09-24. This is dynamic account state and must be rechecked before a
   cost-sensitive decision or provisioning.
@@ -181,6 +184,42 @@ Atomic change-sets #28 and #29 migrated and verified the main `dev` state:
   configuration;
 - the final remote-backed Terraform plan reported no changes.
 
+Atomic change-set #30 added
+`docs/handoffs/WHIMSICAL_INFRASTRUCTURE_PROMPT.md`, a complete description of
+the target GitHub and Azure architecture suitable for recreation by an AI in
+Whimsical. It is a target-design handoff rather than a current-resource
+inventory.
+
+Atomic change-sets #31 and #32 implemented and enabled the Terraform workflow:
+
+- `.github/workflows/infra.yml` runs for relevant `infra/**` changes and changes
+  to the workflow itself;
+- pull requests run formatting, backend initialization, validation, and plan
+  with `id-gh-tf-plan-dev`;
+- pushes to `main` repeat the checks, save the generated plan for one day, and
+  apply that exact artifact with `id-gh-tf-apply-dev`;
+- concurrent pull-request plans for the same PR are cancelled, while `main`
+  applies are serialized and are not cancelled in progress;
+- the GitHub Environment `dev` supplies `AZURE_CLIENT_ID_TF_PLAN`,
+  `AZURE_CLIENT_ID_TF_APPLY`, `AZURE_TENANT_ID`, and
+  `AZURE_SUBSCRIPTION_ID` as non-secret variables;
+- Azure authentication uses GitHub OIDC and no client secret;
+- GitHub's immutable OIDC subject is
+  `repo:WiktorL123@123184089/devops-lab@1346681774:environment:dev`;
+- all four GitHub managed identities use matching immutable federated
+  credentials, and the identity bootstrap reproduces this format;
+- the first PR run completed successfully and reported no Terraform changes;
+- after the owner merged the PR, both the plan and saved-plan apply jobs
+  completed successfully with no infrastructure changes.
+
+The no-change apply verified both OIDC identities, Azure Blob backend access,
+artifact transfer, state locking, and the saved-plan execution path. It did not
+yet prove that the apply identity can successfully create or modify an Azure
+resource; the first approved foundation resource will exercise that path.
+
+Atomic change-set #33 synchronized the progress record, this handoff, the fresh
+session prompt, and the Terraform operating guide with the verified workflow.
+
 ## Decisions already accepted
 
 - Architecture: Option B from ADR-001.
@@ -204,15 +243,19 @@ resources, role assignments, Terraform modules, `plan`, or `apply`.
 The next work remains inside Stage 4. An atomic gate is a unit of approval, not
 a new project stage.
 
-1. Select and design the next meaningful Azure foundation capability module;
-   Log Analytics is the next dependency candidate for the future Container Apps
-   environment.
-2. Present a dedicated atomic gate before implementing the selected module.
-3. Treat its Terraform plan and apply as separate reviewed actions.
+1. Perform a read-only regional, provider, configuration, and cost preflight for
+   Log Analytics, the next dependency for the future Container Apps
+   Environment.
+2. Present a dedicated atomic gate before implementing the capability module.
+3. Open a pull request and review the workflow-produced Terraform plan before
+   the repository owner merges it.
+4. Treat the owner's merge as authorization for the workflow to produce and
+   apply the exact saved post-merge plan, then verify the Azure resource and
+   Terraform state.
 
-Do not silently combine the identity/RBAC bootstrap, infrastructure code,
-`plan`, and `apply` into one approval. If preflight reveals a new architectural
-or paid-SKU choice, stop and request a new decision.
+Do not silently combine identity/RBAC bootstrap changes with infrastructure
+implementation. If preflight reveals a new architectural or paid-SKU choice,
+stop and request a new decision. Never merge on behalf of the repository owner.
 
 ## Identity direction to preserve
 
@@ -245,8 +288,10 @@ and remain Terraform-managed.
   backend;
 - Terraform resource/module implementation beyond the completed network and
   state backend;
-- `terraform plan`, `apply`, import, state migration, or destroy;
-- GitHub environments, variables, secrets, or workflow changes;
+- manual Terraform `plan`, `apply`, import, state migration, or destroy outside
+  the documented workflow, or triggering that workflow for unapproved
+  infrastructure changes;
+- GitHub environments, variables, secrets, or further workflow changes;
 - DNS records, domain validation, or certificates;
 - commit, push, pull-request creation, or merge.
 
