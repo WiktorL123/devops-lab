@@ -136,9 +136,13 @@ condition is:
 
 ```text
 issuer:   https://token.actions.githubusercontent.com
-subject:  repo:WiktorL123/devops-lab:environment:dev
+subject:  repo:WiktorL123@123184089/devops-lab@1346681774:environment:dev
 audience: api://AzureADTokenExchange
 ```
+
+The numeric suffixes are immutable GitHub owner and repository IDs. They bind
+Azure trust to this specific repository even if a repository name is later
+renamed or reused.
 
 Show four separate user-assigned managed identities used by GitHub Actions:
 
