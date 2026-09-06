@@ -53,6 +53,11 @@ Current Azure Portal balance reported on 2026-09-05: **EUR 171.72**, expiring
 - [x] Dedicated state resource group, Storage Account, container, and RBAC applied
 - [x] Main `dev` state migrated from local storage to Azure Blob
 - [x] Remote state lineage, five network resources, blob versioning, and no-drift plan verified
+- [x] Target infrastructure diagram handoff prepared for Whimsical-compatible AI tooling
+- [x] Terraform GitHub Actions workflow implemented for PR plan and post-merge apply
+- [x] GitHub Environment `dev` configured with non-secret Azure identity identifiers
+- [x] GitHub OIDC federation migrated to immutable owner and repository subjects
+- [x] Pull-request plan and post-merge saved-plan apply completed successfully with no changes
 
 ## In progress
 
@@ -65,16 +70,19 @@ Current Azure Portal balance reported on 2026-09-05: **EUR 171.72**, expiring
 - [x] Design and preflight the dedicated Azure Blob remote-state backend
 - [x] Review and apply the saved Terraform remote-state bootstrap plan
 - [x] Migrate and verify the main `dev` state in Azure Blob
-- [ ] Select and design the next Azure foundation capability module
+- [x] Implement and verify the Terraform plan/apply workflow
+- [ ] Perform the read-only preflight and design for the Log Analytics capability
 
 ## Next
 
 For a new computer/session, follow
 `docs/handoffs/STAGE_4_TERRAFORM_HANDOFF.md` and use
-`docs/handoffs/NEXT_SESSION_PROMPT.md`. After the branch is available remotely,
-select and design the next Azure foundation capability module. Implementation,
-`plan`, and `apply` remain separately gated. Do not provision additional Azure
-resources without explicit approval.
+`docs/handoffs/NEXT_SESSION_PROMPT.md`. The next work is a read-only preflight
+and design for the Log Analytics capability required by the future Container
+Apps Environment. Implementation remains separately gated. A pull request runs
+Terraform plan; after the owner has reviewed that plan, merging to `main`
+authorizes the workflow to apply the exact saved post-merge plan. Do not
+provision additional Azure resources without explicit approval.
 
 Stage 2 implementation:
 

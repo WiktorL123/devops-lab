@@ -18,18 +18,21 @@ Najpierw przeczytaj w całości, w tej kolejności:
 8. infra/README.md
 9. infra/modules/README.md
 10. docs/handoffs/STAGE_4_TERRAFORM_HANDOFF.md
+11. docs/handoffs/WHIMSICAL_INFRASTRUCTURE_PROMPT.md
 
 Przeczytaj również w całości:
 
-11. docs/bootstrap/AZURE_IDENTITY_BOOTSTRAP.md
-12. scripts/bootstrap-azure-identity.ps1
+12. docs/bootstrap/AZURE_IDENTITY_BOOTSTRAP.md
+13. scripts/bootstrap-azure-identity.ps1
+14. .github/workflows/infra.yml
 
 Następnie wykonaj wyłącznie odczytowe sprawdzenie:
 
 - aktualnego brancha i git status,
 - wersji Terraform,
 - obecności rootu infra/environments/dev, konfiguracji backendu Azure Blob,
-  bootstrapu infra/bootstrap/tfstate i skryptu identity bootstrap,
+  bootstrapu infra/bootstrap/tfstate, skryptu identity bootstrap i workflow
+  Terraform,
 - zgodności bieżącego stanu z PROGRESS i handoffem.
 
 Ustal aktualny etap projektu i wybierz właściwą rolę. Oczekiwany etap to
@@ -53,9 +56,16 @@ zasobów sieciowych. Change-sety #23-#27 zaprojektowały, sprawdziły i zastosow
 oddzielny bootstrap Azure Blob. Change-sety #28 i #29 zmigrowały pięć zasobów
 sieciowych do `tfstate/dev/terraform.tfstate` i potwierdziły końcowy plan bez
 zmian. Bootstrap zachowuje osobny lokalny state. Następną pracą jest wybór i
-projekt kolejnego modułu Azure foundation; Log Analytics jest kandydatem ze
-względu na przyszłą zależność Container Apps Environment. Implementacja, plan i
-apply pozostają osobno bramkowane.
+zmian. Bootstrap zachowuje osobny lokalny state. Change-set #30 dodał pełny
+handoff docelowej architektury dla Whimsical. Change-sety #31 i #32 dodały
+workflow Terraform oraz dostosowały cztery federated credentials do immutable
+GitHub OIDC subject. Plan na PR oraz zapisany plan i apply po merge do `main`
+zakończyły się sukcesem z `0 to change`.
+
+Następną pracą jest read-only preflight i projekt modułu Log Analytics jako
+zależności przyszłego Container Apps Environment. Implementacja pozostaje
+osobno bramkowana. PR uruchamia plan, a merge wykonany przez właściciela
+repozytorium uruchamia zapis i apply dokładnie utworzonego planu.
 
 Przestrzegaj atomic approval gate. Przed każdą zmianą opisz cel, pliki lub
 zasoby, zachowanie oraz zakres wyłączony i poczekaj na moją wyraźną zgodę.
