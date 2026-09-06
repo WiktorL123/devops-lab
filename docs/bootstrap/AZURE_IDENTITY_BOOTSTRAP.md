@@ -60,9 +60,19 @@ Every federated credential uses:
 
 ```text
 issuer:   https://token.actions.githubusercontent.com
-subject:  repo:WiktorL123/devops-lab:environment:dev
+subject:  repo:WiktorL123@123184089/devops-lab@1346681774:environment:dev
 audience: api://AzureADTokenExchange
 ```
+
+The subject uses GitHub's immutable OIDC format. The owner and repository names
+remain human-readable, while `123184089` is the GitHub owner ID and `1346681774`
+is the repository ID. This prevents a renamed, transferred, deleted, or
+recreated namespace from inheriting the old repository's Azure trust.
+
+The initial bootstrap used GitHub's earlier name-only subject format. GitHub
+issued the immutable format when the first infrastructure workflow ran, so
+change-set #32 updated all four Azure federated credentials and the bootstrap
+defaults to match the token GitHub actually issues.
 
 The script grants:
 

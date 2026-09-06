@@ -11,6 +11,12 @@ param(
     [ValidatePattern('^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$')]
     [string]$GitHubRepository = 'WiktorL123/devops-lab',
 
+    [ValidatePattern('^[1-9][0-9]*$')]
+    [string]$GitHubOwnerId = '123184089',
+
+    [ValidatePattern('^[1-9][0-9]*$')]
+    [string]$GitHubRepositoryId = '1346681774',
+
     [ValidatePattern('^[A-Za-z0-9_.-]+$')]
     [string]$GitHubEnvironment = 'dev',
 
@@ -35,7 +41,9 @@ catch {
 
 $issuer = 'https://token.actions.githubusercontent.com'
 $audience = 'api://AzureADTokenExchange'
-$subject = "repo:${GitHubRepository}:environment:${GitHubEnvironment}"
+$repositoryParts = $GitHubRepository -split '/', 2
+$immutableRepository = "$($repositoryParts[0])@${GitHubOwnerId}/$($repositoryParts[1])@${GitHubRepositoryId}"
+$subject = "repo:${immutableRepository}:environment:${GitHubEnvironment}"
 $federatedCredentialName = "github-${GitHubEnvironment}"
 
 $identityNames = @(
