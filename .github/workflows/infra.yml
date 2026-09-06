@@ -1,0 +1,129 @@
+name: infra
+
+on:
+  pull_request:
+    paths:
+      - "infra/**"
+      - ".github/workflows/infra.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "infra/**"
+      - ".github/workflows/infra.yml"
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: terraform-dev-${{ github.event.pull_request.number || 'apply' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  TF_IN_AUTOMATION: true
+  TF_INPUT: false
+  ARM_USE_AZUREAD: true
+  ARM_USE_OIDC: true
+
+jobs:
+  plan:
+    name: fmt-validate-plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: dev
+    env:
+      ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID_TF_PLAN }}
+      ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      TF_VAR_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+    defaults:
+      run:
+        working-directory: infra/environments/dev
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.16.1
+          terraform_wrapper: false
+
+      - name: Log in to Azure with the plan identity
+        uses: azure/login@93381592711f247e165c389ebb30b596c84cdc48 # v3.0.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID_TF_PLAN }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Check Terraform formatting
+        run: terraform fmt -check -recursive ../..
+
+      - name: Initialize Terraform
+        run: terraform init -backend-config=backend.tfbackend
+
+      - name: Validate Terraform
+        run: terraform validate
+
+      - name: Create Terraform plan
+        run: terraform plan -lock-timeout=5m -no-color -out=tfplan
+
+      - name: Upload saved Terraform plan
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: terraform-dev-plan-${{ github.run_id }}
+          path: infra/environments/dev/tfplan
+          if-no-files-found: error
+          retention-days: 1
+
+  apply:
+    name: apply-saved-plan
+    if: github.event_name == 'push'
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: dev
+    env:
+      ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID_TF_APPLY }}
+      ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      TF_VAR_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+    defaults:
+      run:
+        working-directory: infra/environments/dev
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.16.1
+          terraform_wrapper: false
+
+      - name: Log in to Azure with the apply identity
+        uses: azure/login@93381592711f247e165c389ebb30b596c84cdc48 # v3.0.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID_TF_APPLY }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Initialize Terraform
+        run: terraform init -backend-config=backend.tfbackend
+
+      - name: Download saved Terraform plan
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          name: terraform-dev-plan-${{ github.run_id }}
+          path: infra/environments/dev
+
+      - name: Apply saved Terraform plan
+        run: terraform apply -lock-timeout=5m tfplan
