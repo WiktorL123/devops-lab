@@ -11,7 +11,8 @@ Planned capability boundaries for the accepted platform architecture:
 - `log-analytics`: the baseline workspace and ingestion safeguards
   (implemented for the `dev` root in change-set #35);
 - `identity`: user-assigned managed identities and federated credentials;
-- `acr`: Azure Container Registry and registry-specific configuration;
+- `acr`: Azure Container Registry and repository-scoped deployment access
+  (implemented for the `dev` root in change-set #36);
 - `key-vault`: the runtime secret store and its security configuration;
 - `postgres`: PostgreSQL Flexible Server and database configuration;
 - `container-app-environment`: the VNet-integrated Container Apps environment;
