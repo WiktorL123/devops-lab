@@ -34,3 +34,25 @@ module "log_analytics" {
 
   tags = local.common_tags
 }
+
+module "acr" {
+  source = "../../modules/acr"
+
+  resource_group_name = "rg-${local.name_prefix}-${var.location}"
+  location            = var.location
+  registry_name       = "acrdevopslabdev190c1f"
+  sku                 = "Basic"
+
+  repository_writers = {
+    frontend = {
+      principal_id    = data.azurerm_user_assigned_identity.frontend_deploy.principal_id
+      repository_name = "frontend"
+    }
+    backend = {
+      principal_id    = data.azurerm_user_assigned_identity.backend_deploy.principal_id
+      repository_name = "backend"
+    }
+  }
+
+  tags = local.common_tags
+}

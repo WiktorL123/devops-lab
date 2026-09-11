@@ -37,3 +37,18 @@ output "log_analytics_workspace_customer_id" {
   description = "Non-secret workspace ID used by services that send logs to Log Analytics."
   value       = module.log_analytics.workspace_id
 }
+
+output "container_registry_id" {
+  description = "Resource ID of the dev Azure Container Registry."
+  value       = module.acr.id
+}
+
+output "container_registry_name" {
+  description = "Name of the dev Azure Container Registry."
+  value       = module.acr.name
+}
+
+output "container_registry_login_server" {
+  description = "Login server of the dev Azure Container Registry."
+  value       = module.acr.login_server
+}
