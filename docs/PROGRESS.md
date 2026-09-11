@@ -4,8 +4,11 @@
 
 **Stage 4 - Initial Terraform with Azure Blob remote state**
 
-Current Azure Portal balance reported on 2026-09-05: **EUR 171.72**, expiring
-2026-09-24. Treat this as dynamic account state.
+The last directly reported Azure Portal balance was **EUR 171.72** on
+2026-09-05. On 2026-09-11, the repository owner reported **EUR 0.11** in total
+resource cost, giving an estimated remaining credit of **EUR 171.61**. This is
+a calculation, not a directly confirmed portal balance. The credit expires on
+2026-09-24; treat all of these values as dynamic account state.
 
 ## Completed
 
