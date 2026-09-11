@@ -17,3 +17,20 @@ module "network" {
 
   tags = local.common_tags
 }
+
+module "log_analytics" {
+  source = "../../modules/log-analytics"
+
+  resource_group_name = "rg-${local.name_prefix}-${var.location}"
+  location            = var.location
+  workspace_name      = "law-${local.name_prefix}-${var.location}"
+
+  sku                            = "PerGB2018"
+  retention_in_days              = 30
+  daily_quota_gb                 = 0.1
+  local_authentication_enabled   = true
+  internet_ingestion_access_type = "Enabled"
+  internet_query_access_type     = "Enabled"
+
+  tags = local.common_tags
+}

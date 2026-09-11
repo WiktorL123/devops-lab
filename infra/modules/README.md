@@ -8,7 +8,8 @@ Planned capability boundaries for the accepted platform architecture:
 
 - `network`: VNet, delegated subnets, PostgreSQL private DNS, and VNet links
   (implemented for the `dev` root in change-set #19);
-- `log-analytics`: the baseline workspace and ingestion safeguards;
+- `log-analytics`: the baseline workspace and ingestion safeguards
+  (implemented for the `dev` root in change-set #35);
 - `identity`: user-assigned managed identities and federated credentials;
 - `acr`: Azure Container Registry and registry-specific configuration;
 - `key-vault`: the runtime secret store and its security configuration;
