@@ -50,6 +50,18 @@ variable "soft_delete_retention_days" {
   }
 }
 
+variable "secret_readers" {
+  description = "Service principals granted read-only access to Key Vault secrets."
+  type        = map(string)
+  default     = {}
+}
+
+variable "secret_officers" {
+  description = "Service principals allowed to create and manage Key Vault secrets."
+  type        = map(string)
+  default     = {}
+}
+
 variable "tags" {
   description = "Tags applied to the Azure Key Vault."
   type        = map(string)

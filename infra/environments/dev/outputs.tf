@@ -67,3 +67,28 @@ output "key_vault_uri" {
   description = "Data-plane URI of the dev Azure Key Vault."
   value       = module.key_vault.vault_uri
 }
+
+output "postgres_server_id" {
+  description = "Resource ID of the dev PostgreSQL Flexible Server."
+  value       = module.postgres.server_id
+}
+
+output "postgres_server_name" {
+  description = "Name of the dev PostgreSQL Flexible Server."
+  value       = module.postgres.server_name
+}
+
+output "postgres_server_fqdn" {
+  description = "Private FQDN of the dev PostgreSQL Flexible Server."
+  value       = module.postgres.server_fqdn
+}
+
+output "postgres_database_name" {
+  description = "Name of the dev application database."
+  value       = module.postgres.database_name
+}
+
+output "postgres_database_url_secret_id" {
+  description = "Versionless ID of the Key Vault secret containing the PostgreSQL connection URL."
+  value       = module.postgres.database_url_secret_id
+}
