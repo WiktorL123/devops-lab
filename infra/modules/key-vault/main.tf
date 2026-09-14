@@ -15,3 +15,21 @@ resource "azurerm_key_vault" "this" {
 
   tags = var.tags
 }
+
+resource "azurerm_role_assignment" "secret_reader" {
+  for_each = var.secret_readers
+
+  scope                = azurerm_key_vault.this.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = each.value
+  principal_type       = "ServicePrincipal"
+}
+
+resource "azurerm_role_assignment" "secret_officer" {
+  for_each = var.secret_officers
+
+  scope                = azurerm_key_vault.this.id
+  role_definition_name = "Key Vault Secrets Officer"
+  principal_id         = each.value
+  principal_type       = "ServicePrincipal"
+}

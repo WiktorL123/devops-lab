@@ -67,5 +67,39 @@ module "key_vault" {
   sku_name                   = "standard"
   soft_delete_retention_days = 12
 
+  secret_readers = {
+    terraform_plan = data.azurerm_user_assigned_identity.terraform_plan.principal_id
+  }
+
+  secret_officers = {
+    terraform_apply = data.azurerm_user_assigned_identity.terraform_apply.principal_id
+  }
+
   tags = local.common_tags
+}
+
+module "postgres" {
+  source = "../../modules/postgres"
+
+  resource_group_name = "rg-${local.name_prefix}-${var.location}"
+  location            = var.location
+  server_name         = "psql-${local.name_prefix}-${var.location}"
+
+  postgresql_version  = "16"
+  administrator_login = "devopslab_admin"
+  database_name       = "devops_lab"
+
+  delegated_subnet_id = module.network.postgres_subnet_id
+  private_dns_zone_id = module.network.postgres_private_dns_zone_id
+
+  sku_name              = "B_Standard_B1ms"
+  storage_mb            = 32768
+  backup_retention_days = 7
+
+  key_vault_id             = module.key_vault.id
+  database_url_secret_name = "postgres-database-url"
+
+  tags = local.common_tags
+
+  depends_on = [module.key_vault]
 }

@@ -15,7 +15,9 @@ Planned capability boundaries for the accepted platform architecture:
   (implemented for the `dev` root in change-set #36);
 - `key-vault`: the RBAC-enabled runtime secret store and its security
   configuration (implemented for the `dev` root in change-set #37);
-- `postgres`: PostgreSQL Flexible Server and database configuration;
+- `postgres`: private PostgreSQL Flexible Server, application database, generated
+  administrator credential, and Key Vault connection secret (implemented for
+  the `dev` root in change-set #39);
 - `container-app-environment`: the VNet-integrated Container Apps environment;
 - `container-app`: one reusable workload module instantiated for frontend and
   backend;
