@@ -56,3 +56,16 @@ module "acr" {
 
   tags = local.common_tags
 }
+
+module "key_vault" {
+  source = "../../modules/key-vault"
+
+  resource_group_name        = "rg-${local.name_prefix}-${var.location}"
+  location                   = var.location
+  tenant_id                  = data.azurerm_client_config.current.tenant_id
+  vault_name                 = "kv-devopslab-dev-190c1f"
+  sku_name                   = "standard"
+  soft_delete_retention_days = 12
+
+  tags = local.common_tags
+}

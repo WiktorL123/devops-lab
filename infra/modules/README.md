@@ -13,7 +13,8 @@ Planned capability boundaries for the accepted platform architecture:
 - `identity`: user-assigned managed identities and federated credentials;
 - `acr`: Azure Container Registry and repository-scoped deployment access
   (implemented for the `dev` root in change-set #36);
-- `key-vault`: the runtime secret store and its security configuration;
+- `key-vault`: the RBAC-enabled runtime secret store and its security
+  configuration (implemented for the `dev` root in change-set #37);
 - `postgres`: PostgreSQL Flexible Server and database configuration;
 - `container-app-environment`: the VNet-integrated Container Apps environment;
 - `container-app`: one reusable workload module instantiated for frontend and
