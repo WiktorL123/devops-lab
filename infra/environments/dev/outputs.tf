@@ -52,3 +52,18 @@ output "container_registry_login_server" {
   description = "Login server of the dev Azure Container Registry."
   value       = module.acr.login_server
 }
+
+output "key_vault_id" {
+  description = "Resource ID of the dev Azure Key Vault."
+  value       = module.key_vault.id
+}
+
+output "key_vault_name" {
+  description = "Name of the dev Azure Key Vault."
+  value       = module.key_vault.name
+}
+
+output "key_vault_uri" {
+  description = "Data-plane URI of the dev Azure Key Vault."
+  value       = module.key_vault.vault_uri
+}
