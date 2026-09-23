@@ -31,6 +31,7 @@ jobs:
     env:
       ACR_NAME: ${{ vars.AZURE_CONTAINER_REGISTRY_NAME }}
       CONTAINER_APP_NAME: ca-frontend-dev
+      PUBLIC_FRONTEND_URL: https://app.devopslab.com.pl
       RESOURCE_GROUP: rg-devopslab-dev-polandcentral
       WORKFLOW_SHA: ${{ github.event.workflow_run.head_sha }}
 
@@ -89,12 +90,6 @@ jobs:
       - name: Verify the public frontend and application stack
         shell: bash
         run: |
-          fqdn="$(az containerapp show \
-            --name "$CONTAINER_APP_NAME" \
-            --resource-group "$RESOURCE_GROUP" \
-            --query properties.configuration.ingress.fqdn \
-            --output tsv)"
-
           response="$(curl \
             --fail \
             --silent \
@@ -102,7 +97,7 @@ jobs:
             --retry 12 \
             --retry-all-errors \
             --retry-delay 5 \
-            "https://$fqdn/api/health")"
+            "$PUBLIC_FRONTEND_URL/api/health")"
 
           echo "$response" | jq --exit-status \
             '.service == "backend" and .status == "ok"' >/dev/null
