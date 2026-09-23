@@ -92,3 +92,33 @@ output "postgres_database_url_secret_id" {
   description = "Versionless ID of the Key Vault secret containing the PostgreSQL connection URL."
   value       = module.postgres.database_url_secret_id
 }
+
+output "frontend_runtime_identity_id" {
+  description = "Resource ID of the frontend runtime managed identity."
+  value       = module.runtime_identity.ids.frontend
+}
+
+output "frontend_runtime_identity_client_id" {
+  description = "Client ID of the frontend runtime managed identity."
+  value       = module.runtime_identity.client_ids.frontend
+}
+
+output "frontend_runtime_identity_principal_id" {
+  description = "Principal ID of the frontend runtime managed identity."
+  value       = module.runtime_identity.principal_ids.frontend
+}
+
+output "backend_runtime_identity_id" {
+  description = "Resource ID of the backend runtime managed identity."
+  value       = module.runtime_identity.ids.backend
+}
+
+output "backend_runtime_identity_client_id" {
+  description = "Client ID of the backend runtime managed identity."
+  value       = module.runtime_identity.client_ids.backend
+}
+
+output "backend_runtime_identity_principal_id" {
+  description = "Principal ID of the backend runtime managed identity."
+  value       = module.runtime_identity.principal_ids.backend
+}

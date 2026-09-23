@@ -10,7 +10,9 @@ Planned capability boundaries for the accepted platform architecture:
   (implemented for the `dev` root in change-set #19);
 - `log-analytics`: the baseline workspace and ingestion safeguards
   (implemented for the `dev` root in change-set #35);
-- `identity`: user-assigned managed identities and federated credentials;
+- `identity`: runtime user-assigned managed identities (implemented for the
+  `dev` root in change-set #40); GitHub OIDC identities and federated
+  credentials remain owned by the bootstrap process;
 - `acr`: Azure Container Registry and repository-scoped deployment access
   (implemented for the `dev` root in change-set #36);
 - `key-vault`: the RBAC-enabled runtime secret store and its security
