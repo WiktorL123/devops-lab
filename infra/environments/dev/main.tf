@@ -112,6 +112,7 @@ module "postgres" {
   server_name         = "psql-${local.name_prefix}-${var.location}"
 
   postgresql_version  = "16"
+  availability_zone   = "1"
   administrator_login = "devopslab_admin"
   database_name       = "devops_lab"
 
