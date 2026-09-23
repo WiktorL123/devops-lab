@@ -45,6 +45,13 @@ $repositoryParts = $GitHubRepository -split '/', 2
 $immutableRepository = "$($repositoryParts[0])@${GitHubOwnerId}/$($repositoryParts[1])@${GitHubRepositoryId}"
 $subject = "repo:${immutableRepository}:environment:${GitHubEnvironment}"
 $federatedCredentialName = "github-${GitHubEnvironment}"
+$planSecretsReaderRoleName = 'devops-lab Terraform Plan Container Apps Secrets Reader'
+$planSecretsReaderActions = @(
+    'Microsoft.App/containerApps/read',
+    'Microsoft.App/containerApps/listSecrets/action',
+    'Microsoft.App/jobs/read',
+    'Microsoft.App/jobs/listSecrets/action'
+)
 
 $identityNames = @(
     'id-gh-tf-plan-dev',
@@ -185,6 +192,65 @@ function Ensure-RoleAssignment {
     Add-Change -Type 'RBAC' -Name "$PrincipalName → $RoleName" -Action 'created' -Details $Scope
 }
 
+function Ensure-CustomRoleDefinition {
+    param(
+        [Parameter(Mandatory)][string]$RoleName,
+        [Parameter(Mandatory)][string]$Scope,
+        [Parameter(Mandatory)][string[]]$Actions
+    )
+
+    $existing = Invoke-AzureCliJson -Arguments @(
+        'role', 'definition', 'list',
+        '--name', $RoleName,
+        '--query', '[0]'
+    )
+
+    if ($null -ne $existing) {
+        $existingActions = @($existing.permissions[0].actions)
+        $missingActions = @($Actions | Where-Object { $_ -notin $existingActions })
+        $unexpectedActions = @($existingActions | Where-Object { $_ -notin $Actions })
+
+        if (
+            $Scope -notin $existing.assignableScopes -or
+            $missingActions.Count -gt 0 -or
+            $unexpectedActions.Count -gt 0
+        ) {
+            throw "Custom role '$RoleName' exists with a different definition. Refusing to overwrite it."
+        }
+
+        Add-Change -Type 'Custom role' -Name $RoleName -Action 'existing' -Details $Scope
+        return $existing
+    }
+
+    $definition = [ordered]@{
+        Name             = $RoleName
+        Description      = 'Allows Terraform plan to refresh Container Apps secret references without write access.'
+        IsCustom         = $true
+        Actions          = $Actions
+        NotActions       = @()
+        DataActions      = @()
+        NotDataActions   = @()
+        AssignableScopes = @($Scope)
+    } | ConvertTo-Json -Depth 4 -Compress
+
+    $definitionPath = Join-Path ([System.IO.Path]::GetTempPath()) "devops-lab-role-$([guid]::NewGuid()).json"
+    try {
+        Set-Content -LiteralPath $definitionPath -Value $definition -Encoding utf8NoBOM
+        $created = Invoke-AzureCliJson -Arguments @(
+            'role', 'definition', 'create',
+            '--role-definition', $definitionPath
+        )
+    }
+    finally {
+        if (Test-Path -LiteralPath $definitionPath) {
+            Remove-Item -LiteralPath $definitionPath -Force
+        }
+    }
+
+    Add-Change -Type 'Custom role' -Name $RoleName -Action 'created' -Details $Scope
+    return $created
+}
+
 Write-Banner
 
 Write-Step 'Checking local tools and authenticated Azure context'
@@ -216,6 +282,7 @@ foreach ($identityName in $identityNames) {
     Write-Host "    federated credential: $federatedCredentialName → $subject"
 }
 Write-Host '  • Reader: id-gh-tf-plan-dev at application resource-group scope'
+Write-Host "  • $planSecretsReaderRoleName`: id-gh-tf-plan-dev at application resource-group scope"
 Write-Host '  • Contributor: id-gh-tf-apply-dev at application resource-group scope'
 Write-Host '  • constrained RBAC Administrator: id-gh-tf-apply-dev at application resource-group scope'
 
@@ -313,10 +380,23 @@ Write-Step 'Ensuring least-privilege bootstrap role assignments'
 $planIdentity = $identityResults | Where-Object Name -eq 'id-gh-tf-plan-dev'
 $applyIdentity = $identityResults | Where-Object Name -eq 'id-gh-tf-apply-dev'
 
+$planSecretsReaderRole = Ensure-CustomRoleDefinition `
+    -RoleName $planSecretsReaderRoleName `
+    -Scope $resourceGroupScope `
+    -Actions $planSecretsReaderActions
+
+$roleIds[$planSecretsReaderRoleName] = $planSecretsReaderRole.name
+
 Ensure-RoleAssignment `
     -PrincipalId $planIdentity.PrincipalId `
     -PrincipalName $planIdentity.Name `
     -RoleName 'Reader' `
+    -Scope $resourceGroupScope
+
+Ensure-RoleAssignment `
+    -PrincipalId $planIdentity.PrincipalId `
+    -PrincipalName $planIdentity.Name `
+    -RoleName $planSecretsReaderRoleName `
     -Scope $resourceGroupScope
 
 Ensure-RoleAssignment `
