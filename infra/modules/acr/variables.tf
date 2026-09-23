@@ -45,6 +45,23 @@ variable "repository_writers" {
   }
 }
 
+variable "repository_readers" {
+  description = "Runtime principals granted read access to one named repository each."
+  type = map(object({
+    principal_id    = string
+    repository_name = string
+  }))
+  default = {}
+
+  validation {
+    condition = alltrue([
+      for reader in values(var.repository_readers) :
+      can(regex("^[a-z0-9]+([._/-][a-z0-9]+)*$", reader.repository_name))
+    ])
+    error_message = "Each repository_name must be a valid lowercase ACR repository path."
+  }
+}
+
 variable "tags" {
   description = "Tags applied to the Azure Container Registry."
   type        = map(string)

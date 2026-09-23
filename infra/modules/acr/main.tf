@@ -37,3 +37,26 @@ resource "azurerm_role_assignment" "repository_writer" {
     )
   CONDITION
 }
+
+resource "azurerm_role_assignment" "repository_reader" {
+  for_each = var.repository_readers
+
+  scope                            = azurerm_container_registry.this.id
+  role_definition_name             = "Container Registry Repository Reader"
+  principal_id                     = each.value.principal_id
+  principal_type                   = "ServicePrincipal"
+  skip_service_principal_aad_check = true
+
+  condition_version = "2.0"
+  condition         = <<-CONDITION
+    (
+      (
+        !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/metadata/read'})
+        AND
+        !(ActionMatches{'Microsoft.ContainerRegistry/registries/repositories/content/read'})
+      )
+      OR
+      @Request[Microsoft.ContainerRegistry/registries/repositories:name] StringEqualsIgnoreCase '${each.value.repository_name}'
+    )
+  CONDITION
+}

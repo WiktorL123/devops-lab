@@ -35,6 +35,20 @@ module "log_analytics" {
   tags = local.common_tags
 }
 
+module "runtime_identity" {
+  source = "../../modules/identity"
+
+  resource_group_name = "rg-${local.name_prefix}-${var.location}"
+  location            = var.location
+
+  identities = {
+    frontend = "id-app-frontend-dev"
+    backend  = "id-app-backend-dev"
+  }
+
+  tags = local.common_tags
+}
+
 module "acr" {
   source = "../../modules/acr"
 
@@ -54,6 +68,17 @@ module "acr" {
     }
   }
 
+  repository_readers = {
+    frontend = {
+      principal_id    = module.runtime_identity.principal_ids.frontend
+      repository_name = "frontend"
+    }
+    backend = {
+      principal_id    = module.runtime_identity.principal_ids.backend
+      repository_name = "backend"
+    }
+  }
+
   tags = local.common_tags
 }
 
@@ -68,7 +93,8 @@ module "key_vault" {
   soft_delete_retention_days = 12
 
   secret_readers = {
-    terraform_plan = data.azurerm_user_assigned_identity.terraform_plan.principal_id
+    terraform_plan  = data.azurerm_user_assigned_identity.terraform_plan.principal_id
+    backend_runtime = module.runtime_identity.principal_ids.backend
   }
 
   secret_officers = {
