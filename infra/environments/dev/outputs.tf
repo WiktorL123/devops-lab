@@ -153,6 +153,16 @@ output "frontend_container_app_fqdn" {
   value       = module.frontend.latest_revision_fqdn
 }
 
+output "frontend_custom_domain" {
+  description = "Public custom domain assigned to the frontend Container App."
+  value       = module.frontend_custom_domain.domain_name
+}
+
+output "frontend_managed_certificate_id" {
+  description = "Resource ID of the managed TLS certificate for the frontend custom domain."
+  value       = module.frontend_custom_domain.managed_certificate_id
+}
+
 output "backend_container_app_id" {
   description = "Resource ID of the internal backend Container App."
   value       = module.backend.id

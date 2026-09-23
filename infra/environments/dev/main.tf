@@ -199,6 +199,19 @@ module "frontend" {
   depends_on = [module.acr, module.backend]
 }
 
+module "frontend_custom_domain" {
+  source = "../../modules/container-app-domain"
+
+  domain_name                  = "app.devopslab.com.pl"
+  container_app_id             = module.frontend.id
+  container_app_environment_id = module.container_app_environment.id
+  managed_certificate_name     = "mc-app-devopslab-dev"
+
+  tags = local.common_tags
+
+  depends_on = [module.frontend]
+}
+
 module "migration_job" {
   source = "../../modules/container-app-job"
 
