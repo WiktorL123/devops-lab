@@ -6,6 +6,7 @@ on:
       - "frontend/**"
       - ".nvmrc"
       - ".github/workflows/frontend-ci.yml"
+      - ".github/workflows/frontend-deploy.yml"
   push:
     branches:
       - main
@@ -13,6 +14,7 @@ on:
       - "frontend/**"
       - ".nvmrc"
       - ".github/workflows/frontend-ci.yml"
+      - ".github/workflows/frontend-deploy.yml"
 
 permissions:
   contents: read

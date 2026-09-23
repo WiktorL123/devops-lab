@@ -1,0 +1,162 @@
+name: backend-deploy
+
+on:
+  workflow_run:
+    workflows:
+      - backend-ci
+    branches:
+      - main
+    types:
+      - completed
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-deploy-dev
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: migrate-and-deploy
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: dev
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      ACR_NAME: ${{ vars.AZURE_CONTAINER_REGISTRY_NAME }}
+      CONTAINER_APP_NAME: ca-backend-dev
+      MIGRATION_JOB_NAME: job-devopslab-dev-migration
+      RESOURCE_GROUP: rg-devopslab-dev-polandcentral
+      WORKFLOW_SHA: ${{ github.event.workflow_run.head_sha }}
+
+    steps:
+      - name: Check out the tested revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ env.WORKFLOW_SHA }}
+
+      - name: Log in to Azure with the backend deployment identity
+        uses: azure/login@93381592711f247e165c389ebb30b596c84cdc48 # v3.0.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID_BACKEND_DEPLOY }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Compute the published image tag
+        id: image_tag
+        shell: bash
+        working-directory: backend
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          short_sha="${WORKFLOW_SHA::7}"
+          echo "value=${version}-${short_sha}" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve backend image digests
+        id: images
+        shell: bash
+        env:
+          IMAGE_TAG: ${{ steps.image_tag.outputs.value }}
+        run: |
+          runtime_digest="$(az acr manifest show-metadata \
+            --registry "$ACR_NAME" \
+            --name "backend:$IMAGE_TAG" \
+            --query digest \
+            --output tsv)"
+          migration_digest="$(az acr manifest show-metadata \
+            --registry "$ACR_NAME" \
+            --name "backend:migration-$IMAGE_TAG" \
+            --query digest \
+            --output tsv)"
+
+          if [[ -z "$runtime_digest" || -z "$migration_digest" ]]; then
+            echo "Unable to resolve one or more backend image digests." >&2
+            exit 1
+          fi
+
+          echo "runtime=$ACR_NAME.azurecr.io/backend@$runtime_digest" >> "$GITHUB_OUTPUT"
+          echo "migration=$ACR_NAME.azurecr.io/backend@$migration_digest" >> "$GITHUB_OUTPUT"
+
+      - name: Start the database migration
+        id: migration
+        shell: bash
+        env:
+          MIGRATION_IMAGE: ${{ steps.images.outputs.migration }}
+        run: |
+          execution_name="$(az containerapp job start \
+            --name "$MIGRATION_JOB_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
+            --container-name migration \
+            --image "$MIGRATION_IMAGE" \
+            --query name \
+            --output tsv)"
+
+          if [[ -z "$execution_name" ]]; then
+            echo "Azure did not return a migration execution name." >&2
+            exit 1
+          fi
+
+          echo "execution_name=$execution_name" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for the database migration
+        shell: bash
+        env:
+          EXECUTION_NAME: ${{ steps.migration.outputs.execution_name }}
+        run: |
+          for attempt in {1..60}; do
+            status="$(az containerapp job execution show \
+              --name "$MIGRATION_JOB_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --job-execution-name "$EXECUTION_NAME" \
+              --query properties.status \
+              --output tsv 2>/dev/null || true)"
+
+            echo "Migration execution $EXECUTION_NAME status: ${status:-Pending}"
+
+            case "$status" in
+              Succeeded)
+                exit 0
+                ;;
+              Failed|Canceled|Cancelled|Stopped)
+                echo "Database migration ended with status $status." >&2
+                exit 1
+                ;;
+            esac
+
+            sleep 10
+          done
+
+          echo "Database migration did not finish within 10 minutes." >&2
+          exit 1
+
+      - name: Deploy the backend image
+        env:
+          IMAGE_REFERENCE: ${{ steps.images.outputs.runtime }}
+        run: >-
+          az containerapp update
+          --name "$CONTAINER_APP_NAME"
+          --resource-group "$RESOURCE_GROUP"
+          --image "$IMAGE_REFERENCE"
+          --output none
+
+      - name: Verify the backend revision
+        shell: bash
+        run: |
+          revision="$(az containerapp show \
+            --name "$CONTAINER_APP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
+            --query properties.latestRevisionName \
+            --output tsv)"
+
+          if [[ -z "$revision" ]]; then
+            echo "Azure did not report a latest backend revision." >&2
+            exit 1
+          fi
+
+          echo "Backend revision deployed: $revision"

@@ -62,7 +62,12 @@ GitHub Actions runs independent `frontend-ci` and `backend-ci` workflows. Each w
 - uses the Node.js version from `.nvmrc` and caches the component's npm download cache;
 - executes `lint -> test -> build` after a deterministic `npm ci` install.
 
-Backend CI also generates Prisma Client before the quality checks. Stage 2 CI does not build or publish container images and does not deploy the application.
+Backend CI also generates Prisma Client before the quality checks. After a
+successful relevant run on `main`, the CI workflow publishes versioned images
+to ACR. Independent `frontend-deploy` and `backend-deploy` workflows then
+deploy the exact published digests. Backend deployment runs the matching Prisma
+migration image as a Container Apps Job and updates the backend only after that
+execution succeeds.
 
 Azure-first DevOps learning lab focused on CI/CD, Terraform, container delivery, secrets, managed PostgreSQL, troubleshooting, and cost-aware infrastructure.
 
