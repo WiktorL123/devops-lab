@@ -67,6 +67,8 @@ a calculation, not a directly confirmed portal balance. The credit expires on
 - [x] Initial migration job completed successfully against private PostgreSQL
 - [x] Frontend-to-backend proxy routing diagnosed and corrected with a frontend patch release
 - [x] Frontend and backend deployment workflow definitions implemented
+- [x] Public DNS records created at home.pl for `app.devopslab.com.pl`
+- [x] Terraform definitions added for the frontend custom-domain binding and free managed TLS certificate
 
 ## In progress
 
@@ -80,7 +82,9 @@ a calculation, not a directly confirmed portal balance. The credit expires on
 - [x] Review and apply the saved Terraform remote-state bootstrap plan
 - [x] Migrate and verify the main `dev` state in Azure Blob
 - [x] Implement and verify the Terraform plan/apply workflow
-- [ ] Verify the first automated frontend and backend deployments after merge to `main`
+- [x] Verify the first automated frontend and backend deployments after merge to `main`
+- [ ] Apply and verify the frontend custom domain and managed TLS certificate
+- [ ] Switch the frontend deployment smoke test to `https://app.devopslab.com.pl/api/health`
 
 ## Next
 
@@ -90,8 +94,12 @@ For a new computer/session, follow
 frontend and backend deployment workflows. Successful post-merge CI publishes
 immutable images; frontend deployment updates the public app by digest, while
 backend deployment first runs the matching migration image and updates the
-internal app only after migration success. Custom-domain and managed-TLS
-configuration remain separately gated.
+internal app only after migration success. Public DNS records now point
+`app.devopslab.com.pl` directly to the generated frontend FQDN, and Terraform
+defines the custom-domain binding plus its free Container Apps managed TLS
+certificate. The HTTPS smoke-test switch remains gated until the first
+certificate apply succeeds, avoiding a race between independent post-merge
+infrastructure and frontend deployment workflows.
 
 Stage 2 implementation:
 
