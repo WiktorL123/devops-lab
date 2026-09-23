@@ -69,6 +69,8 @@ a calculation, not a directly confirmed portal balance. The credit expires on
 - [x] Frontend and backend deployment workflow definitions implemented
 - [x] Public DNS records created at home.pl for `app.devopslab.com.pl`
 - [x] Terraform definitions added for the frontend custom-domain binding and free managed TLS certificate
+- [x] Frontend custom domain bound to its managed TLS certificate and verified over HTTPS
+- [x] Frontend deployment smoke test switched to the public custom domain
 
 ## In progress
 
@@ -83,8 +85,8 @@ a calculation, not a directly confirmed portal balance. The credit expires on
 - [x] Migrate and verify the main `dev` state in Azure Blob
 - [x] Implement and verify the Terraform plan/apply workflow
 - [x] Verify the first automated frontend and backend deployments after merge to `main`
-- [ ] Apply and verify the frontend custom domain and managed TLS certificate
-- [ ] Switch the frontend deployment smoke test to `https://app.devopslab.com.pl/api/health`
+- [x] Apply and verify the frontend custom domain and managed TLS certificate
+- [x] Switch the frontend deployment smoke test to `https://app.devopslab.com.pl/api/health`
 
 ## Next
 
@@ -97,9 +99,13 @@ backend deployment first runs the matching migration image and updates the
 internal app only after migration success. Public DNS records now point
 `app.devopslab.com.pl` directly to the generated frontend FQDN, and Terraform
 defines the custom-domain binding plus its free Container Apps managed TLS
-certificate. The HTTPS smoke-test switch remains gated until the first
-certificate apply succeeds, avoiding a race between independent post-merge
-infrastructure and frontend deployment workflows.
+certificate. Because AzureRM creates the custom hostname and managed certificate
+as separate asynchronous resources, the initial certificate binding was
+completed once with `az containerapp hostname bind --validation-method CNAME`.
+Terraform ignores the Azure-completed binding fields to avoid recreating the
+domain. Frontend deployments now verify DNS, managed TLS, frontend ingress,
+proxy routing, and backend health through
+`https://app.devopslab.com.pl/api/health`.
 
 Stage 2 implementation:
 

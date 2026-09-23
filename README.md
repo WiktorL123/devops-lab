@@ -69,6 +69,12 @@ deploy the exact published digests. Backend deployment runs the matching Prisma
 migration image as a Container Apps Job and updates the backend only after that
 execution succeeds.
 
+The deployed dev frontend is available at
+<https://app.devopslab.com.pl>. Its deployment smoke test calls
+`https://app.devopslab.com.pl/api/health`, covering public DNS, the Azure
+Container Apps managed TLS certificate, frontend ingress, proxy routing, and
+backend health. The backend remains internal and has no separate public domain.
+
 Azure-first DevOps learning lab focused on CI/CD, Terraform, container delivery, secrets, managed PostgreSQL, troubleshooting, and cost-aware infrastructure.
 
 The application itself is intentionally simple. Its job is to provide a realistic frontend/backend workload for DevOps exercises.
