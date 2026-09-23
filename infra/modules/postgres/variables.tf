@@ -29,6 +29,16 @@ variable "postgresql_version" {
   }
 }
 
+variable "availability_zone" {
+  description = "Availability zone that hosts the PostgreSQL Flexible Server."
+  type        = string
+
+  validation {
+    condition     = var.availability_zone == "1"
+    error_message = "The existing dev PostgreSQL Flexible Server is hosted in availability zone 1."
+  }
+}
+
 variable "administrator_login" {
   description = "PostgreSQL administrator login name."
   type        = string
