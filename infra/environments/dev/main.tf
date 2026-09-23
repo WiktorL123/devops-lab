@@ -143,3 +143,87 @@ module "postgres" {
 
   depends_on = [module.key_vault]
 }
+
+module "backend" {
+  source = "../../modules/container-app"
+
+  name                         = "ca-backend-${var.environment}"
+  resource_group_name          = "rg-${local.name_prefix}-${var.location}"
+  container_app_environment_id = module.container_app_environment.id
+  container_name               = "backend"
+  image                        = "${module.acr.login_server}/backend:${local.initial_image_tag}"
+  registry_server              = module.acr.login_server
+  runtime_identity_id          = module.runtime_identity.ids.backend
+  deployment_principal_id      = data.azurerm_user_assigned_identity.backend_deploy.principal_id
+
+  external_ingress_enabled = false
+  target_port              = 3000
+
+  secret_environment_variables = {
+    DATABASE_URL = "database-url"
+  }
+
+  key_vault_secrets = {
+    database-url = {
+      key_vault_secret_id = module.postgres.database_url_secret_id
+      identity_id         = module.runtime_identity.ids.backend
+    }
+  }
+
+  tags = local.common_tags
+
+  depends_on = [module.acr, module.key_vault]
+}
+
+module "frontend" {
+  source = "../../modules/container-app"
+
+  name                         = "ca-frontend-${var.environment}"
+  resource_group_name          = "rg-${local.name_prefix}-${var.location}"
+  container_app_environment_id = module.container_app_environment.id
+  container_name               = "frontend"
+  image                        = "${module.acr.login_server}/frontend:${local.initial_image_tag}"
+  registry_server              = module.acr.login_server
+  runtime_identity_id          = module.runtime_identity.ids.frontend
+  deployment_principal_id      = data.azurerm_user_assigned_identity.frontend_deploy.principal_id
+
+  external_ingress_enabled = true
+  target_port              = 8080
+
+  environment_variables = {
+    BACKEND_UPSTREAM = "ca-backend-${var.environment}"
+  }
+
+  tags = local.common_tags
+
+  depends_on = [module.acr, module.backend]
+}
+
+module "migration_job" {
+  source = "../../modules/container-app-job"
+
+  name                         = "job-${local.name_prefix}-migration"
+  resource_group_name          = "rg-${local.name_prefix}-${var.location}"
+  location                     = var.location
+  container_app_environment_id = module.container_app_environment.id
+  container_name               = "migration"
+  image                        = "${module.acr.login_server}/backend:migration-${local.initial_image_tag}"
+  registry_server              = module.acr.login_server
+  runtime_identity_id          = module.runtime_identity.ids.backend
+  operator_principal_id        = data.azurerm_user_assigned_identity.backend_deploy.principal_id
+
+  secret_environment_variables = {
+    DATABASE_URL = "database-url"
+  }
+
+  key_vault_secrets = {
+    database-url = {
+      key_vault_secret_id = module.postgres.database_url_secret_id
+      identity_id         = module.runtime_identity.ids.backend
+    }
+  }
+
+  tags = local.common_tags
+
+  depends_on = [module.acr, module.key_vault]
+}

@@ -61,6 +61,9 @@ a calculation, not a directly confirmed portal balance. The credit expires on
 - [x] GitHub Environment `dev` configured with non-secret Azure identity identifiers
 - [x] GitHub OIDC federation migrated to immutable owner and repository subjects
 - [x] Pull-request plan and post-merge saved-plan apply completed successfully with no changes
+- [x] Frontend, backend, and migration container images published to ACR with immutable version/SHA tags
+- [x] VNet-integrated Consumption Container Apps environment created
+- [x] Terraform definitions added for the public frontend, internal backend, and manually triggered migration job
 
 ## In progress
 
@@ -74,18 +77,19 @@ a calculation, not a directly confirmed portal balance. The credit expires on
 - [x] Review and apply the saved Terraform remote-state bootstrap plan
 - [x] Migrate and verify the main `dev` state in Azure Blob
 - [x] Implement and verify the Terraform plan/apply workflow
-- [ ] Perform the read-only preflight and design for the Log Analytics capability
+- [ ] Review and apply the frontend, backend, and migration-job Terraform plan through the infrastructure workflow
 
 ## Next
 
 For a new computer/session, follow
 `docs/handoffs/STAGE_4_TERRAFORM_HANDOFF.md` and use
-`docs/handoffs/NEXT_SESSION_PROMPT.md`. The next work is a read-only preflight
-and design for the Log Analytics capability required by the future Container
-Apps Environment. Implementation remains separately gated. A pull request runs
-Terraform plan; after the owner has reviewed that plan, merging to `main`
-authorizes the workflow to apply the exact saved post-merge plan. Do not
-provision additional Azure resources without explicit approval.
+`docs/handoffs/NEXT_SESSION_PROMPT.md`. The current work introduces the first
+Container Apps workloads: a public frontend, an internal backend, and a
+manually triggered Prisma migration job. A pull request runs Terraform plan;
+after the owner has reviewed that plan, merging to `main` authorizes the
+workflow to apply the exact saved post-merge plan. Deployment workflows,
+automatic migration execution, and custom-domain configuration remain
+separately gated.
 
 Stage 2 implementation:
 
