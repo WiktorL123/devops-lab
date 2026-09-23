@@ -13,3 +13,13 @@ model LabEvent {
   createdAt DateTime @default(now())
 }
 
+model CounterfactualIncident {
+  id         String   @id @default(uuid())
+  title      String
+  prevention String
+  severity   String
+  confidence Int
+  occurredOn DateTime @db.Date
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}

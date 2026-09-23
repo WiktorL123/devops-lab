@@ -35,6 +35,7 @@ h3 { margin: 0.7rem 0; font-family: Georgia, serif; font-size: 1.35rem; line-hei
 .summary div + div { padding-left: 2rem; border-left: 1px solid #9ca79e; }
 .summary strong { font-family: Georgia, serif; font-size: 2rem; font-weight: 500; }
 .summary span { color: #637068; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.notice { width: min(82rem, 100%); margin: 1rem auto 0; padding: 0.9rem 1rem; border: 1px solid #c8a29d; background: #f4e7e4; color: #763d36; font-size: 0.85rem; }
 
 .workspace { display: grid; grid-template-columns: minmax(18rem, 0.75fr) minmax(28rem, 1.25fr); gap: 1px; margin-top: 2rem; border: 1px solid #9ca79e; background: #9ca79e; box-shadow: 0 1.5rem 4rem rgb(42 54 47 / 10%); }
 .panel { padding: clamp(1.4rem, 3vw, 2.5rem); background: rgb(247 248 244 / 94%); }
@@ -53,6 +54,7 @@ input[type="range"] { padding: 0; accent-color: #416f57; }
 .button { border: 1px solid #8f9b92; border-radius: 999px; padding: 0.75rem 1.1rem; background: transparent; color: #28372f; font-weight: 750; }
 .button--primary { border-color: #244936; background: #244936; color: #f6f8f4; }
 .button:hover { transform: translateY(-1px); }
+.button:disabled, .text-button:disabled { cursor: wait; opacity: 0.55; }
 
 .incident-list { display: grid; gap: 1rem; }
 .incident { padding: 1.4rem; border: 1px solid #c2c9c3; border-radius: 0.5rem; background: #fff; }
