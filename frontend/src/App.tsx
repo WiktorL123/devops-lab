@@ -1,20 +1,12 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 
-import {
-  addIncident,
-  initialIncidents,
-  parseIncidents,
-  removeIncident,
-  updateIncident,
-  type Incident,
-  type IncidentDraft,
-  type Severity,
-} from './incidents'
+import { createIncident, deleteIncident, listIncidents, updateIncident } from './api'
+import { specimenDrafts, type Incident, type IncidentDraft, type Severity } from './incidents'
 import { statusLabel, type ApiState } from './status'
 
 type HealthResponse = { service: string; status: 'ok' }
+type RegistryState = 'loading' | 'ready' | 'error'
 
-const storageKey = 'devops-lab.counterfactual-incidents.v1'
 const severityLabels: Record<Severity, string> = {
   minor: 'Minor inconvenience',
   moderate: 'Moderately theoretical',
@@ -23,22 +15,16 @@ const severityLabels: Record<Severity, string> = {
 }
 
 function emptyDraft(): IncidentDraft {
-  return {
-    title: '',
-    prevention: '',
-    severity: 'moderate',
-    confidence: 50,
-    date: new Date().toISOString().slice(0, 10),
-  }
+  return { title: '', prevention: '', severity: 'moderate', confidence: 50, date: new Date().toISOString().slice(0, 10) }
 }
 
 export function App() {
   const [apiState, setApiState] = useState<ApiState>('loading')
-  const [incidents, setIncidents] = useState<Incident[]>(() =>
-    parseIncidents(window.localStorage.getItem(storageKey)),
-  )
+  const [registryState, setRegistryState] = useState<RegistryState>('loading')
+  const [incidents, setIncidents] = useState<Incident[]>([])
   const [draft, setDraft] = useState<IncidentDraft>(emptyDraft)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -52,42 +38,51 @@ export function App() {
         if (error instanceof DOMException && error.name === 'AbortError') return
         setApiState('error')
       })
-
     return () => controller.abort()
   }, [])
 
   useEffect(() => {
-    window.localStorage.setItem(storageKey, JSON.stringify(incidents))
-  }, [incidents])
+    void refreshRegistry()
+  }, [])
 
-  const averageConfidence = useMemo(() => {
-    if (incidents.length === 0) return 0
-    return Math.round(
-      incidents.reduce((total, incident) => total + incident.confidence, 0) /
-        incidents.length,
-    )
-  }, [incidents])
+  async function refreshRegistry() {
+    setRegistryState('loading')
+    try {
+      setIncidents(await listIncidents())
+      setRegistryState('ready')
+    } catch {
+      setRegistryState('error')
+    }
+  }
 
-  function submitIncident(event: FormEvent<HTMLFormElement>) {
+  const averageConfidence = useMemo(() => incidents.length === 0 ? 0 : Math.round(
+    incidents.reduce((total, incident) => total + incident.confidence, 0) / incidents.length,
+  ), [incidents])
+
+  async function submitIncident(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setIncidents((current) =>
-      editingId
-        ? updateIncident(current, editingId, draft)
-        : addIncident(current, draft, crypto.randomUUID()),
-    )
-    setDraft(emptyDraft())
-    setEditingId(null)
+    setSaving(true)
+    try {
+      if (editingId) {
+        const saved = await updateIncident(editingId, draft)
+        setIncidents((current) => current.map((incident) => incident.id === saved.id ? saved : incident))
+      } else {
+        const saved = await createIncident(draft)
+        setIncidents((current) => [saved, ...current])
+      }
+      setDraft(emptyDraft())
+      setEditingId(null)
+      setRegistryState('ready')
+    } catch {
+      setRegistryState('error')
+    } finally {
+      setSaving(false)
+    }
   }
 
   function beginEditing(incident: Incident) {
     setEditingId(incident.id)
-    setDraft({
-      title: incident.title,
-      prevention: incident.prevention,
-      severity: incident.severity,
-      confidence: incident.confidence,
-      date: incident.date,
-    })
+    setDraft({ title: incident.title, prevention: incident.prevention, severity: incident.severity, confidence: incident.confidence, date: incident.date })
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -96,16 +91,29 @@ export function App() {
     setDraft(emptyDraft())
   }
 
-  function deleteIncident(incident: Incident) {
+  async function remove(incident: Incident) {
     if (!window.confirm(`Remove “${incident.title}” from the record of things that did not happen?`)) return
-    setIncidents((current) => removeIncident(current, incident.id))
-    if (editingId === incident.id) cancelEditing()
+    try {
+      await deleteIncident(incident.id)
+      setIncidents((current) => current.filter((item) => item.id !== incident.id))
+      if (editingId === incident.id) cancelEditing()
+    } catch {
+      setRegistryState('error')
+    }
   }
 
-  function resetArchive() {
-    if (!window.confirm('Restore the original collection of prevented events?')) return
-    setIncidents(initialIncidents)
-    cancelEditing()
+  async function restoreSpecimens() {
+    if (!window.confirm('Add the original specimens to the shared registry?')) return
+    setSaving(true)
+    try {
+      const created = await Promise.all(specimenDrafts.map(createIncident))
+      setIncidents((current) => [...created, ...current])
+      setRegistryState('ready')
+    } catch {
+      setRegistryState('error')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -114,15 +122,9 @@ export function App() {
         <div>
           <p className="eyebrow">Office of events that failed to occur</p>
           <h1>Counterfactual Incident Registry</h1>
-          <p className="intro">
-            A formal archive for operational disasters prevented so thoroughly
-            that their existence can no longer be demonstrated.
-          </p>
+          <p className="intro">A formal archive for operational disasters prevented so thoroughly that their existence can no longer be demonstrated.</p>
         </div>
-        <div className={`status status--${apiState}`} aria-live="polite">
-          <span className="status__dot" aria-hidden="true" />
-          <span>{statusLabel(apiState)}</span>
-        </div>
+        <div className={`status status--${apiState}`} aria-live="polite"><span className="status__dot" aria-hidden="true" /><span>{statusLabel(apiState)}</span></div>
       </header>
 
       <section className="summary" aria-label="Registry summary">
@@ -131,113 +133,33 @@ export function App() {
         <div><strong>0</strong><span>incidents observed</span></div>
       </section>
 
+      {registryState === 'error' && (
+        <div className="notice" role="alert">The registry is temporarily unknowable. <button className="text-button" type="button" onClick={() => void refreshRegistry()}>Try again</button></div>
+      )}
+
       <div className="workspace">
         <section className="panel panel--form">
-          <div className="section-heading">
-            <p className="section-number">Form 00-N</p>
-            <h2>{editingId ? 'Amend a non-event' : 'Register a non-event'}</h2>
-          </div>
-
-          <form onSubmit={submitIncident}>
-            <label>
-              Incident that did not happen
-              <input
-                required
-                maxLength={100}
-                value={draft.title}
-                onChange={(event) => setDraft({ ...draft, title: event.target.value })}
-                placeholder="The cache declined to develop ambitions"
-              />
-            </label>
-
-            <label>
-              Preventative measure allegedly responsible
-              <textarea
-                required
-                maxLength={220}
-                rows={4}
-                value={draft.prevention}
-                onChange={(event) => setDraft({ ...draft, prevention: event.target.value })}
-                placeholder="Describe the ritual, process, or tasteful intervention."
-              />
-            </label>
-
+          <div className="section-heading"><p className="section-number">Form 00-N</p><h2>{editingId ? 'Amend a non-event' : 'Register a non-event'}</h2></div>
+          <form onSubmit={(event) => void submitIncident(event)}>
+            <label>Incident that did not happen<input required maxLength={100} value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} placeholder="The cache declined to develop ambitions" /></label>
+            <label>Preventative measure allegedly responsible<textarea required maxLength={220} rows={4} value={draft.prevention} onChange={(event) => setDraft({ ...draft, prevention: event.target.value })} placeholder="Describe the ritual, process, or tasteful intervention." /></label>
             <div className="form-grid">
-              <label>
-                Hypothetical severity
-                <select
-                  value={draft.severity}
-                  onChange={(event) => setDraft({ ...draft, severity: event.target.value as Severity })}
-                >
-                  {Object.entries(severityLabels).map(([value, label]) => (
-                    <option key={value} value={value}>{label}</option>
-                  ))}
-                </select>
-              </label>
-
-              <label>
-                Date of non-occurrence
-                <input
-                  required
-                  type="date"
-                  value={draft.date}
-                  onChange={(event) => setDraft({ ...draft, date: event.target.value })}
-                />
-              </label>
+              <label>Hypothetical severity<select value={draft.severity} onChange={(event) => setDraft({ ...draft, severity: event.target.value as Severity })}>{Object.entries(severityLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+              <label>Date of non-occurrence<input required type="date" value={draft.date} onChange={(event) => setDraft({ ...draft, date: event.target.value })} /></label>
             </div>
-
-            <label>
-              Confidence that danger existed: <strong>{draft.confidence}%</strong>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={draft.confidence}
-                onChange={(event) => setDraft({ ...draft, confidence: Number(event.target.value) })}
-              />
-            </label>
-
-            <div className="form-actions">
-              <button className="button button--primary" type="submit">
-                {editingId ? 'Save amendment' : 'Archive non-event'}
-              </button>
-              {editingId && <button className="button" type="button" onClick={cancelEditing}>Cancel</button>}
-            </div>
+            <label>Confidence that danger existed: <strong>{draft.confidence}%</strong><input type="range" min="0" max="100" value={draft.confidence} onChange={(event) => setDraft({ ...draft, confidence: Number(event.target.value) })} /></label>
+            <div className="form-actions"><button className="button button--primary" type="submit" disabled={saving}>{saving ? 'Consulting reality…' : editingId ? 'Save amendment' : 'Archive non-event'}</button>{editingId && <button className="button" type="button" onClick={cancelEditing}>Cancel</button>}</div>
           </form>
         </section>
 
         <section className="panel panel--registry">
-          <div className="section-heading section-heading--row">
-            <div>
-              <p className="section-number">Permanent provisional record</p>
-              <h2>Prevented incidents</h2>
-            </div>
-            <button className="text-button" type="button" onClick={resetArchive}>Restore specimens</button>
-          </div>
-
+          <div className="section-heading section-heading--row"><div><p className="section-number">Permanent provisional record</p><h2>Prevented incidents</h2></div><button className="text-button" type="button" disabled={saving} onClick={() => void restoreSpecimens()}>Add specimens</button></div>
           <div className="incident-list">
-            {incidents.length === 0 ? (
-              <div className="empty-state">
-                <p>The absence of records has been recorded.</p>
-                <span>Nothing continues to happen as expected.</span>
-              </div>
-            ) : incidents.map((incident) => (
+            {registryState === 'loading' ? <div className="empty-state"><p>Consulting the official absence…</p></div> : incidents.length === 0 ? <div className="empty-state"><p>The absence of records has been recorded.</p><span>Nothing continues to happen as expected.</span></div> : incidents.map((incident) => (
               <article className="incident" key={incident.id}>
-                <div className="incident__meta">
-                  <span className={`severity severity--${incident.severity}`}>
-                    {severityLabels[incident.severity]}
-                  </span>
-                  <time dateTime={incident.date}>{incident.date}</time>
-                </div>
-                <h3>{incident.title}</h3>
-                <p>{incident.prevention}</p>
-                <div className="incident__footer">
-                  <span>{incident.confidence}% plausible in retrospect</span>
-                  <div>
-                    <button className="text-button" type="button" onClick={() => beginEditing(incident)}>Edit</button>
-                    <button className="text-button text-button--danger" type="button" onClick={() => deleteIncident(incident)}>Delete</button>
-                  </div>
-                </div>
+                <div className="incident__meta"><span className={`severity severity--${incident.severity}`}>{severityLabels[incident.severity]}</span><time dateTime={incident.date}>{incident.date}</time></div>
+                <h3>{incident.title}</h3><p>{incident.prevention}</p>
+                <div className="incident__footer"><span>{incident.confidence}% plausible in retrospect</span><div><button className="text-button" type="button" onClick={() => beginEditing(incident)}>Edit</button><button className="text-button text-button--danger" type="button" onClick={() => void remove(incident)}>Delete</button></div></div>
               </article>
             ))}
           </div>
