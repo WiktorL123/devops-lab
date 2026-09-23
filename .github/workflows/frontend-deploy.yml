@@ -1,0 +1,108 @@
+name: frontend-deploy
+
+on:
+  workflow_run:
+    workflows:
+      - frontend-ci
+    branches:
+      - main
+    types:
+      - completed
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-deploy-dev
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: deploy
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: dev
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      ACR_NAME: ${{ vars.AZURE_CONTAINER_REGISTRY_NAME }}
+      CONTAINER_APP_NAME: ca-frontend-dev
+      RESOURCE_GROUP: rg-devopslab-dev-polandcentral
+      WORKFLOW_SHA: ${{ github.event.workflow_run.head_sha }}
+
+    steps:
+      - name: Check out the tested revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ env.WORKFLOW_SHA }}
+
+      - name: Log in to Azure with the frontend deployment identity
+        uses: azure/login@93381592711f247e165c389ebb30b596c84cdc48 # v3.0.0
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID_FRONTEND_DEPLOY }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Compute the published image tag
+        id: image_tag
+        shell: bash
+        working-directory: frontend
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          short_sha="${WORKFLOW_SHA::7}"
+          echo "value=${version}-${short_sha}" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve the frontend image digest
+        id: image
+        shell: bash
+        env:
+          IMAGE_TAG: ${{ steps.image_tag.outputs.value }}
+        run: |
+          digest="$(az acr manifest show-metadata \
+            --registry "$ACR_NAME" \
+            --name "frontend:$IMAGE_TAG" \
+            --query digest \
+            --output tsv)"
+
+          if [[ -z "$digest" ]]; then
+            echo "Unable to resolve the frontend image digest." >&2
+            exit 1
+          fi
+
+          echo "reference=$ACR_NAME.azurecr.io/frontend@$digest" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy the frontend image
+        env:
+          IMAGE_REFERENCE: ${{ steps.image.outputs.reference }}
+        run: >-
+          az containerapp update
+          --name "$CONTAINER_APP_NAME"
+          --resource-group "$RESOURCE_GROUP"
+          --image "$IMAGE_REFERENCE"
+          --output none
+
+      - name: Verify the public frontend and application stack
+        shell: bash
+        run: |
+          fqdn="$(az containerapp show \
+            --name "$CONTAINER_APP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
+            --query properties.configuration.ingress.fqdn \
+            --output tsv)"
+
+          response="$(curl \
+            --fail \
+            --silent \
+            --show-error \
+            --retry 12 \
+            --retry-all-errors \
+            --retry-delay 5 \
+            "https://$fqdn/api/health")"
+
+          echo "$response" | jq --exit-status \
+            '.service == "backend" and .status == "ok"' >/dev/null

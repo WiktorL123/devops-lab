@@ -6,6 +6,7 @@ on:
       - "backend/**"
       - ".nvmrc"
       - ".github/workflows/backend-ci.yml"
+      - ".github/workflows/backend-deploy.yml"
   push:
     branches:
       - main
@@ -13,6 +14,7 @@ on:
       - "backend/**"
       - ".nvmrc"
       - ".github/workflows/backend-ci.yml"
+      - ".github/workflows/backend-deploy.yml"
 
 permissions:
   contents: read

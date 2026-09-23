@@ -64,6 +64,9 @@ a calculation, not a directly confirmed portal balance. The credit expires on
 - [x] Frontend, backend, and migration container images published to ACR with immutable version/SHA tags
 - [x] VNet-integrated Consumption Container Apps environment created
 - [x] Terraform definitions added for the public frontend, internal backend, and manually triggered migration job
+- [x] Initial migration job completed successfully against private PostgreSQL
+- [x] Frontend-to-backend proxy routing diagnosed and corrected with a frontend patch release
+- [x] Frontend and backend deployment workflow definitions implemented
 
 ## In progress
 
@@ -77,19 +80,18 @@ a calculation, not a directly confirmed portal balance. The credit expires on
 - [x] Review and apply the saved Terraform remote-state bootstrap plan
 - [x] Migrate and verify the main `dev` state in Azure Blob
 - [x] Implement and verify the Terraform plan/apply workflow
-- [ ] Review and apply the frontend, backend, and migration-job Terraform plan through the infrastructure workflow
+- [ ] Verify the first automated frontend and backend deployments after merge to `main`
 
 ## Next
 
 For a new computer/session, follow
 `docs/handoffs/STAGE_4_TERRAFORM_HANDOFF.md` and use
-`docs/handoffs/NEXT_SESSION_PROMPT.md`. The current work introduces the first
-Container Apps workloads: a public frontend, an internal backend, and a
-manually triggered Prisma migration job. A pull request runs Terraform plan;
-after the owner has reviewed that plan, merging to `main` authorizes the
-workflow to apply the exact saved post-merge plan. Deployment workflows,
-automatic migration execution, and custom-domain configuration remain
-separately gated.
+`docs/handoffs/NEXT_SESSION_PROMPT.md`. The current work adds independent
+frontend and backend deployment workflows. Successful post-merge CI publishes
+immutable images; frontend deployment updates the public app by digest, while
+backend deployment first runs the matching migration image and updates the
+internal app only after migration success. Custom-domain and managed-TLS
+configuration remain separately gated.
 
 Stage 2 implementation:
 
