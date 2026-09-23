@@ -49,6 +49,19 @@ module "runtime_identity" {
   tags = local.common_tags
 }
 
+module "container_app_environment" {
+  source = "../../modules/container-app-environment"
+
+  resource_group_name = "rg-${local.name_prefix}-${var.location}"
+  location            = var.location
+  environment_name    = "cae-${local.name_prefix}-${var.location}"
+
+  infrastructure_subnet_id   = module.network.container_apps_subnet_id
+  log_analytics_workspace_id = module.log_analytics.id
+
+  tags = local.common_tags
+}
+
 module "acr" {
   source = "../../modules/acr"
 

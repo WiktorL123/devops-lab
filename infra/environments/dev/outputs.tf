@@ -122,3 +122,23 @@ output "backend_runtime_identity_principal_id" {
   description = "Principal ID of the backend runtime managed identity."
   value       = module.runtime_identity.principal_ids.backend
 }
+
+output "container_app_environment_id" {
+  description = "Resource ID of the dev Container Apps environment."
+  value       = module.container_app_environment.id
+}
+
+output "container_app_environment_name" {
+  description = "Name of the dev Container Apps environment."
+  value       = module.container_app_environment.name
+}
+
+output "container_app_environment_default_domain" {
+  description = "Default domain assigned to the dev Container Apps environment."
+  value       = module.container_app_environment.default_domain
+}
+
+output "container_app_environment_static_ip_address" {
+  description = "Static IP address assigned to the dev Container Apps environment."
+  value       = module.container_app_environment.static_ip_address
+}

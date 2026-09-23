@@ -20,7 +20,9 @@ Planned capability boundaries for the accepted platform architecture:
 - `postgres`: private PostgreSQL Flexible Server, application database, generated
   administrator credential, and Key Vault connection secret (implemented for
   the `dev` root in change-set #39);
-- `container-app-environment`: the VNet-integrated Container Apps environment;
+- `container-app-environment`: the VNet-integrated Consumption Container Apps
+  environment connected to Log Analytics (implemented for the `dev` root in
+  change-set #41);
 - `container-app`: one reusable workload module instantiated for frontend and
   backend;
 - `storage`: the separately bootstrapped Terraform-state Storage Account,
