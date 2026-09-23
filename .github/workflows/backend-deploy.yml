@@ -94,6 +94,7 @@ jobs:
             --resource-group "$RESOURCE_GROUP" \
             --container-name migration \
             --image "$MIGRATION_IMAGE" \
+            --env-vars DATABASE_URL=secretref:database-url \
             --query name \
             --output tsv)"
 
