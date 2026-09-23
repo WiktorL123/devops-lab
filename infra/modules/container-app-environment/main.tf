@@ -10,4 +10,8 @@ resource "azurerm_container_app_environment" "this" {
   zone_redundancy_enabled        = false
 
   tags = var.tags
+
+  lifecycle {
+    ignore_changes = [workload_profile]
+  }
 }

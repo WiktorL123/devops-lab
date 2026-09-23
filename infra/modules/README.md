@@ -23,8 +23,12 @@ Planned capability boundaries for the accepted platform architecture:
 - `container-app-environment`: the VNet-integrated Consumption Container Apps
   environment connected to Log Analytics (implemented for the `dev` root in
   change-set #41);
-- `container-app`: one reusable workload module instantiated for frontend and
-  backend;
+- `container-app`: one reusable workload module instantiated for the public
+  frontend and internal backend, including runtime identity, ACR pull, Key
+  Vault references, scale-to-zero, and resource-scoped deployment RBAC;
+- `container-app-job`: the manually triggered Prisma migration workload with
+  backend runtime identity, Key Vault integration, and resource-scoped job
+  operator RBAC;
 - `storage`: the separately bootstrapped Terraform-state Storage Account,
   private container, retention controls, and data-plane RBAC (implemented in
   change-set #24).

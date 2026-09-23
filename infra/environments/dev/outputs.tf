@@ -142,3 +142,33 @@ output "container_app_environment_static_ip_address" {
   description = "Static IP address assigned to the dev Container Apps environment."
   value       = module.container_app_environment.static_ip_address
 }
+
+output "frontend_container_app_id" {
+  description = "Resource ID of the frontend Container App."
+  value       = module.frontend.id
+}
+
+output "frontend_container_app_fqdn" {
+  description = "Azure-generated FQDN of the frontend Container App."
+  value       = module.frontend.latest_revision_fqdn
+}
+
+output "backend_container_app_id" {
+  description = "Resource ID of the internal backend Container App."
+  value       = module.backend.id
+}
+
+output "backend_container_app_fqdn" {
+  description = "Internal FQDN of the backend Container App."
+  value       = module.backend.latest_revision_fqdn
+}
+
+output "migration_job_id" {
+  description = "Resource ID of the PostgreSQL migration Container Apps Job."
+  value       = module.migration_job.id
+}
+
+output "migration_job_name" {
+  description = "Name of the PostgreSQL migration Container Apps Job."
+  value       = module.migration_job.name
+}
